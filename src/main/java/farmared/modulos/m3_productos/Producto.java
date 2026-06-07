@@ -1,8 +1,8 @@
-package farmared.modulos.m2_productos;
+package farmared.modulos.m3_productos;
 
 import farmared.enums.TipoIVA;
-import farmared.modulos.m1_proveedores.Proveedor;
-import farmared.modulos.m1_proveedores.Rubro;
+import farmared.modulos.m2_proveedores.Proveedor;
+import farmared.modulos.m2_proveedores.Rubro;
 import java.util.ArrayList;
 import java.util.List;
 

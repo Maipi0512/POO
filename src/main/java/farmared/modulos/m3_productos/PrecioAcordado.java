@@ -1,6 +1,6 @@
-package farmared.modulos.m2_productos;
+package farmared.modulos.m3_productos;
 
-import farmared.modulos.m1_proveedores.Proveedor;
+import farmared.modulos.m2_proveedores.Proveedor;
 import java.util.Date;
 
 /**

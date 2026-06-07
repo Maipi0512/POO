@@ -1,4 +1,4 @@
-package farmared.modulos.m1_proveedores;
+package farmared.modulos.m2_proveedores;
 
 import farmared.enums.CondicionIVA;
 import farmared.enums.TipoImpuesto;
@@ -59,16 +59,20 @@ public class Proveedor {
     // =========================================================================
 
     /**
-     * Calcula la deuda vigente iterando cada Comprobante y llamando
-     * afectarCuentaCorriente() de forma polimorfica (DS4, pasos 4-7).
+     * DS4 paso 4-8: loop afectarCuentaCorriente() → calcularDeudaVigente() → totalDeudaVigente.
      * Facturas/ND suman, NotasCredito restan.
      */
     public double obtenerCuentaCorriente() {
-        double total = 0.0;
+        double acumulado = 0.0;
         for (Comprobante c : comprobantes) {
-            total += c.afectarCuentaCorriente();
+            acumulado += c.afectarCuentaCorriente();
         }
-        return Math.round(total * 100.0) / 100.0;
+        return calcularDeudaVigente(acumulado);
+    }
+
+    /** DS4 paso 7: self-call para normalizar el total acumulado. */
+    private double calcularDeudaVigente(double suma) {
+        return Math.round(suma * 100.0) / 100.0;
     }
 
     public void agregarComprobante(Comprobante comprobante) {

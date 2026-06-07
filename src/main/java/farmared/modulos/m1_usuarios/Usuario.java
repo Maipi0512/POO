@@ -1,4 +1,4 @@
-package farmared.modulos.m8_usuarios;
+package farmared.modulos.m1_usuarios;
 
 import farmared.enums.RolUsuario;
 

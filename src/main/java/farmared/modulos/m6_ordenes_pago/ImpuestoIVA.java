@@ -1,8 +1,8 @@
-package farmared.modulos.m3_impuestos;
+package farmared.modulos.m6_ordenes_pago;
 
 import farmared.enums.CondicionIVA;
 import farmared.enums.TipoImpuesto;
-import farmared.modulos.m1_proveedores.Proveedor;
+import farmared.modulos.m2_proveedores.Proveedor;
 
 /** Retencion de IVA. Solo aplica a Responsables Inscriptos (RF-08, RF-10). */
 public class ImpuestoIVA extends Impuesto {

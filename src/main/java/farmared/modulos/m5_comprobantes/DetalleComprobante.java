@@ -1,6 +1,6 @@
 package farmared.modulos.m5_comprobantes;
 
-import farmared.modulos.m2_productos.Producto;
+import farmared.modulos.m3_productos.Producto;
 
 /** Linea de un Comprobante: producto, cantidad, precio unitario e IVA. */
 public class DetalleComprobante {

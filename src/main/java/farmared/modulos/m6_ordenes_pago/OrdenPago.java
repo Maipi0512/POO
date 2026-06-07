@@ -1,8 +1,8 @@
 package farmared.modulos.m6_ordenes_pago;
 
 import farmared.enums.EstadoOrdenPago;
-import farmared.modulos.m1_proveedores.Proveedor;
-import farmared.modulos.m3_impuestos.Retencion;
+import farmared.modulos.m2_proveedores.Proveedor;
+import farmared.modulos.m6_ordenes_pago.Retencion;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,13 +55,12 @@ public class OrdenPago {
     }
 
     /**
-     * Registra los medios de pago y valida que su suma cubra el importeNeto (DS2).
-     * Retorna true si todos los medios son validos y la suma coincide.
+     * DS2: registra los medios de pago y valida que su suma cubra el importeNeto.
+     * El controller ya llamo mp.procesarPago() en su loop antes de invocar este metodo.
      */
     public boolean procesarPago(List<MedioPago> lista) {
         double total = 0.0;
         for (MedioPago mp : lista) {
-            if (!mp.procesarPago()) return false;
             mediosPago.add(mp);
             total += mp.getImporte();
         }

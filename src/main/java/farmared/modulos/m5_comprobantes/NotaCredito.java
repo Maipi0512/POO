@@ -2,7 +2,7 @@ package farmared.modulos.m5_comprobantes;
 
 import farmared.enums.EstadoComprobante;
 import farmared.enums.TipoComprobante;
-import farmared.modulos.m1_proveedores.Proveedor;
+import farmared.modulos.m2_proveedores.Proveedor;
 import java.util.Date;
 
 /**

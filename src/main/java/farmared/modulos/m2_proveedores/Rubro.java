@@ -1,4 +1,4 @@
-package farmared.modulos.m1_proveedores;
+package farmared.modulos.m2_proveedores;
 
 /**
  * Categoria que clasifica el tipo de bienes o servicios (RF-02).

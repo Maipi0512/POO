@@ -1,4 +1,4 @@
-package farmared.modulos.m3_impuestos;
+package farmared.modulos.m6_ordenes_pago;
 
 /**
  * Tramo de monto con su porcentaje de retencion (RF-10).

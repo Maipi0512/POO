@@ -1,6 +1,6 @@
 package farmared.modulos.m4_ordenes_compra;
 
-import farmared.modulos.m2_productos.Producto;
+import farmared.modulos.m3_productos.Producto;
 
 /** Linea de una Orden de Compra (DS1, paso new DetalleOC → calcularSubtotal). */
 public class DetalleOC {

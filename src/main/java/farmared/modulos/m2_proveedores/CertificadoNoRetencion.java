@@ -1,4 +1,4 @@
-package farmared.modulos.m1_proveedores;
+package farmared.modulos.m2_proveedores;
 
 import farmared.enums.TipoImpuesto;
 import java.util.Date;

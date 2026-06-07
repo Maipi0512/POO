@@ -1,8 +1,8 @@
 package farmared.modulos.m4_ordenes_compra;
 
 import farmared.enums.EstadoOrdenCompra;
-import farmared.modulos.m1_proveedores.Proveedor;
-import farmared.modulos.m8_usuarios.Autorizacion;
+import farmared.modulos.m2_proveedores.Proveedor;
+import farmared.modulos.m1_usuarios.Autorizacion;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
