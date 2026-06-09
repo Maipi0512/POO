@@ -12,7 +12,7 @@ import java.util.List;
  *
  * Flujo DS1:
  *   new OrdenCompra → agregarDetalle() x N → calcularTotal()
- *   → validarTopeDeuda() → emitir() o emitirConAutorizacion()
+ *   → proveedor.validarNuevaOC(importeTotal) → emitir() o emitirConAutorizacion()
  */
 public class OrdenCompra {
 
@@ -45,11 +45,6 @@ public class OrdenCompra {
         return importeTotal;
     }
 
-    /** Valida si la OC cabe dentro del tope de deuda del proveedor (RF-12). */
-    public boolean validarTopeDeuda() {
-        return proveedor.validarNuevaOC(importeTotal);
-    }
-
     public void emitir() { estado = EstadoOrdenCompra.EMITIDA; }
 
     public void emitirConAutorizacion(Autorizacion auth) {
@@ -70,8 +65,6 @@ public class OrdenCompra {
     public double getImporteTotal()         { return importeTotal; }
     public EstadoOrdenCompra getEstado()    { return estado; }
     public Autorizacion getAutorizacion()   { return autorizacion; }
-
-    public void setEstado(EstadoOrdenCompra e) { estado = e; }
 
     @Override
     public String toString() {

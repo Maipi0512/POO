@@ -121,8 +121,6 @@ public class Proveedor {
         if (!rubros.contains(rubro)) rubros.add(rubro);
     }
 
-    public void quitarRubro(Rubro rubro) { rubros.remove(rubro); }
-
     // =========================================================================
     // GETTERS Y SETTERS
     // =========================================================================
