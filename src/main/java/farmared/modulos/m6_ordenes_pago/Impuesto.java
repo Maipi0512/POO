@@ -8,8 +8,8 @@ import java.util.List;
 /**
  * Clase abstracta base para los impuestos retenibles (RF-08, RF-10).
  *
- * Polimorfismo: cada subclase implementa calcularRetencion() con su logica propia.
- * El sistema llama al metodo sin saber el tipo concreto → polimorfismo.
+ * Patron Strategy: cada subclase define su estrategia de calculo en calcularRetencion().
+ * Polimorfismo: el sistema invoca el metodo sin conocer el tipo concreto.
  */
 public abstract class Impuesto {
 
