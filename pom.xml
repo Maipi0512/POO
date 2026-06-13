@@ -25,14 +25,20 @@
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
             <manifest>
-              <mainClass>farmared.Main</mainClass>
+              <mainClass>farmared.ui.FarmaredApp</mainClass>
             </manifest>
           </archive>
         </configuration>

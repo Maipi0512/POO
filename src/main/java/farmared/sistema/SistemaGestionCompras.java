@@ -8,6 +8,8 @@ import farmared.modulos.m4_ordenes_compra.*;
 import farmared.modulos.m5_comprobantes.*;
 import farmared.modulos.m6_ordenes_pago.*;
 import farmared.modulos.m8_usuarios.*;
+import farmared.dominio.vo.CUIT;
+import farmared.sistema.observador.NotificadorSistema;
 import java.util.*;
 
 /**
@@ -41,6 +43,7 @@ public class SistemaGestionCompras {
     private int contadorOP          = 1;
     private int contadorComprobante = 1;
     private int contadorAutorizacion= 1;
+    private int contadorRubro        = 1;
 
     public SistemaGestionCompras(String nombreSistema, String version) {
         this.nombreSistema = nombreSistema;
@@ -60,11 +63,36 @@ public class SistemaGestionCompras {
     // =========================================================================
 
     public void registrarProveedor(Proveedor proveedor) {
+        new CUIT(proveedor.getCuit());
         for (Proveedor p : proveedores) {
             if (p.getCuit().equals(proveedor.getCuit()))
                 throw new IllegalArgumentException("CUIT duplicado: " + proveedor.getCuit());
         }
         proveedores.add(proveedor);
+        notificarCambio("PROVEEDOR_REGISTRADO");
+    }
+
+    public void modificarProveedor(String cuit, String razonSocial, String nombreFantasia,
+                                    String domicilio, String telefono, String email,
+                                    CondicionIVA condicionIVA, double topeDeuda) {
+        Proveedor p = buscarProveedorPorId(cuit);
+        if (p == null) throw new IllegalArgumentException("Proveedor no encontrado: " + cuit);
+        if (!p.isActivo()) throw new IllegalStateException("No se puede modificar un proveedor dado de baja.");
+        p.setRazonSocial(razonSocial);
+        p.setNombreFantasia(nombreFantasia);
+        p.setDomicilioComercial(domicilio);
+        p.setTelefono(telefono);
+        p.setEmail(email);
+        p.setCondicionIVA(condicionIVA);
+        p.setTopeMaximoDeuda(topeDeuda);
+        notificarCambio("PROVEEDOR_MODIFICADO");
+    }
+
+    public void darBajaProveedor(String cuit) {
+        Proveedor p = buscarProveedorPorId(cuit);
+        if (p == null) throw new IllegalArgumentException("Proveedor no encontrado: " + cuit);
+        p.setActivo(false);
+        notificarCambio("PROVEEDOR_BAJA");
     }
 
     /** Loop "buscar en coleccion de proveedores" de los diagramas de secuencia. */
@@ -74,7 +102,29 @@ public class SistemaGestionCompras {
         return null;
     }
 
-    public void registrarRubro(Rubro rubro) { rubros.add(rubro); }
+    public void registrarRubro(Rubro rubro) {
+        rubros.add(rubro);
+        if (rubro.getIdRubro() >= contadorRubro) contadorRubro = rubro.getIdRubro() + 1;
+    }
+
+    public Rubro registrarRubro(String nombre, String descripcion) {
+        for (Rubro r : rubros) {
+            if (r.getNombre().equalsIgnoreCase(nombre.trim()))
+                throw new IllegalArgumentException("Ya existe un rubro con ese nombre.");
+        }
+        Rubro rubro = new Rubro(contadorRubro++, nombre.trim(), descripcion.trim());
+        rubros.add(rubro);
+        notificarCambio("RUBRO_REGISTRADO");
+        return rubro;
+    }
+
+    public List<Rubro> getRubros() { return new ArrayList<>(rubros); }
+
+    public void registrarCertificadoNoRetencion(String cuit, CertificadoNoRetencion certificado) {
+        Proveedor prov = buscarProveedorPorId(cuit);
+        if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado: " + cuit);
+        prov.agregarCertificado(certificado);
+    }
 
     // =========================================================================
     // MODULO 2 — CATALOGO DE PRODUCTOS (RF-05 a RF-07)
@@ -86,6 +136,14 @@ public class SistemaGestionCompras {
                 throw new IllegalArgumentException("Codigo duplicado: " + producto.getCodigoInterno());
         }
         productos.add(producto);
+        notificarCambio("PRODUCTO_REGISTRADO");
+    }
+
+    public void darBajaProducto(String codigoInterno) {
+        Producto p = buscarProductoPorCodigo(codigoInterno);
+        if (p == null) throw new IllegalArgumentException("Producto no encontrado: " + codigoInterno);
+        p.setActivo(false);
+        notificarCambio("PRODUCTO_BAJA");
     }
 
     /** Loop "buscar en coleccion de productos" del DS1. */
@@ -93,6 +151,36 @@ public class SistemaGestionCompras {
         for (Producto p : productos)
             if (p.getCodigoInterno().equals(codigo)) return p;
         return null;
+    }
+
+    /** Productos con precio vigente para el proveedor (RF-06, RF-07). */
+    public List<Producto> listarProductosPorProveedor(String cuitProveedor) {
+        Proveedor prov = buscarProveedorPorId(cuitProveedor);
+        if (prov == null) return Collections.emptyList();
+        List<Producto> resultado = new ArrayList<>();
+        for (Producto p : productos) {
+            if (!p.isActivo()) continue;
+            PrecioAcordado precio = p.obtenerUltimoPrecio(prov);
+            if (precio != null && precio.estaVigente()) resultado.add(p);
+        }
+        return resultado;
+    }
+
+    public double obtenerPrecioVigente(String codigoProducto, String cuitProveedor) {
+        Producto producto = buscarProductoPorCodigo(codigoProducto);
+        Proveedor prov = buscarProveedorPorId(cuitProveedor);
+        if (producto == null || prov == null) return -1;
+        PrecioAcordado precio = producto.obtenerUltimoPrecio(prov);
+        return (precio != null && precio.estaVigente()) ? precio.getPrecioUnitario() : -1;
+    }
+
+    /** Agrega un precio acordado a un producto existente (mismo producto, otro proveedor). */
+    public void agregarPrecioAcordado(String codigoProducto, String cuitProveedor, double precioUnitario) {
+        Producto producto = buscarProductoPorCodigo(codigoProducto);
+        if (producto == null) throw new IllegalArgumentException("Producto no encontrado: " + codigoProducto);
+        Proveedor prov = buscarProveedorPorId(cuitProveedor);
+        if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado: " + cuitProveedor);
+        producto.agregarPrecioAcordado(new PrecioAcordado(precioUnitario, new Date(), null, prov));
     }
 
     // =========================================================================
@@ -145,6 +233,7 @@ public class SistemaGestionCompras {
             oc.emitirConAutorizacion(auth);
         }
         ordenesCompra.add(oc);
+        notificarCambio("OC_EMITIDA");
         return oc;
     }
 
@@ -191,7 +280,8 @@ public class SistemaGestionCompras {
         boolean hayDesvio = false;
         if (!detallesOC.isEmpty()) {
             hayDesvio = !validarProductos(factura.getDetalles(), detallesOC)
-                     || !validarPrecios(factura.getDetalles(), detallesOC);
+                     || !validarPrecios(factura.getDetalles(), detallesOC)
+                     || !validarImpuestos(factura.getDetalles());
         }
 
         boolean sinOC = nrosOC.isEmpty();
@@ -209,6 +299,8 @@ public class SistemaGestionCompras {
 
         prov.agregarComprobante(factura);
         comprobantes.add(factura);
+        actualizarEstadoOrdenesCompra(factura);
+        notificarCambio("COMPROBANTE_REGISTRADO");
         return factura;
     }
 
@@ -221,6 +313,7 @@ public class SistemaGestionCompras {
         for (DetalleComprobante d : detalles) nc.agregarDetalle(d);
         prov.agregarComprobante(nc);
         comprobantes.add(nc);
+        notificarCambio("COMPROBANTE_REGISTRADO");
         return nc;
     }
 
@@ -233,6 +326,7 @@ public class SistemaGestionCompras {
         for (DetalleComprobante d : detalles) nd.agregarDetalle(d);
         prov.agregarComprobante(nd);
         comprobantes.add(nd);
+        notificarCambio("COMPROBANTE_REGISTRADO");
         return nd;
     }
 
@@ -261,6 +355,46 @@ public class SistemaGestionCompras {
             }
         }
         return true;
+    }
+
+    /** RF-16: valida alicuota e importe de IVA por linea segun el catalogo. */
+    public boolean validarImpuestos(List<DetalleComprobante> factura) {
+        for (DetalleComprobante d : factura) {
+            double alicuotaEsperada = d.getProducto().getTipoIVA().getPorcentaje();
+            if (Math.abs(d.getAlicuotaIVA() - alicuotaEsperada) > 0.01) return false;
+
+            double ivaEsperado = Math.round(d.getSubtotal() * (alicuotaEsperada / 100.0) * 100.0) / 100.0;
+            if (Math.abs(d.getImporteIVA() - ivaEsperado) > 0.01) return false;
+        }
+        return true;
+    }
+
+    /** Actualiza estado de OC asociadas (State: PARCIALMENTE_FACTURADA / FACTURADA). */
+    private void actualizarEstadoOrdenesCompra(Factura factura) {
+        for (OrdenCompra oc : factura.getOrdenesCompraAsociadas()) {
+            if (oc.getEstado() == EstadoOrdenCompra.ANULADA) continue;
+
+            boolean algunaLineaFacturada = false;
+            boolean todasCompletas = true;
+
+            for (DetalleOC doc : oc.getDetalles()) {
+                double cantFacturada = 0;
+                for (DetalleComprobante dc : factura.getDetalles()) {
+                    if (dc.getProducto().getCodigoInterno()
+                            .equals(doc.getProducto().getCodigoInterno())) {
+                        cantFacturada += dc.getCantidad();
+                    }
+                }
+                if (cantFacturada > 0) algunaLineaFacturada = true;
+                if (cantFacturada < doc.getCantidad()) todasCompletas = false;
+            }
+
+            if (todasCompletas && algunaLineaFacturada) {
+                oc.setEstado(EstadoOrdenCompra.FACTURADA);
+            } else if (algunaLineaFacturada) {
+                oc.setEstado(EstadoOrdenCompra.PARCIALMENTE_FACTURADA);
+            }
+        }
     }
 
     // =========================================================================
@@ -314,6 +448,7 @@ public class SistemaGestionCompras {
             );
         op.cerrarOrden();
         ordenesPago.add(op);
+        notificarCambio("OP_EMITIDA");
         return op;
     }
 
@@ -406,11 +541,59 @@ public class SistemaGestionCompras {
         return p != null ? p.obtenerPreciosHistoricos() : Collections.emptyList();
     }
 
+    /** RF-23: Facturas recibidas por dia y proveedor (cuit opcional). */
+    public List<Factura> consultarFacturasPorDia(Date fecha, String cuitProveedor) {
+        List<Factura> resultado = new ArrayList<>();
+        for (Comprobante c : comprobantes) {
+            if (!(c instanceof Factura)) continue;
+            Factura f = (Factura) c;
+            if (!mismaFecha(f.getFechaRecepcion(), fecha)) continue;
+            if (cuitProveedor != null && !cuitProveedor.isBlank()
+                    && !f.getProveedor().getCuit().equals(cuitProveedor)) continue;
+            resultado.add(f);
+        }
+        return resultado;
+    }
+
+    /** RF-23: Detalle de pagos realizados por proveedor. */
+    public List<OrdenPago> consultarPagosPorProveedor(String cuitProveedor) {
+        List<OrdenPago> resultado = new ArrayList<>();
+        for (OrdenPago op : ordenesPago) {
+            if (op.getProveedor().getCuit().equals(cuitProveedor)) resultado.add(op);
+        }
+        return resultado;
+    }
+
+    private boolean mismaFecha(Date a, Date b) {
+        if (a == null || b == null) return false;
+        Calendar ca = Calendar.getInstance();
+        ca.setTime(a);
+        Calendar cb = Calendar.getInstance();
+        cb.setTime(b);
+        return ca.get(Calendar.YEAR) == cb.get(Calendar.YEAR)
+                && ca.get(Calendar.DAY_OF_YEAR) == cb.get(Calendar.DAY_OF_YEAR);
+    }
+
     // =========================================================================
     // MODULO 8 — USUARIOS (RF-28)
     // =========================================================================
 
     public void registrarUsuario(Usuario usuario) { usuarios.add(usuario); }
+
+    public Usuario autenticarUsuario(String username, String password) {
+        for (Usuario u : usuarios) {
+            if (u.validarCredenciales(username, password)) return u;
+        }
+        return null;
+    }
+
+    public List<Usuario> listarSupervisores() {
+        List<Usuario> resultado = new ArrayList<>();
+        for (Usuario u : usuarios) {
+            if (u.esAutorizador()) resultado.add(u);
+        }
+        return resultado;
+    }
 
     // =========================================================================
     // GETTERS
@@ -423,4 +606,9 @@ public class SistemaGestionCompras {
     public List<OrdenCompra> getOrdenesCompra()       { return new ArrayList<>(ordenesCompra); }
     public List<OrdenPago> getOrdenesPago()           { return new ArrayList<>(ordenesPago); }
     public List<Comprobante> getComprobantes()        { return new ArrayList<>(comprobantes); }
+    public List<Impuesto> getImpuestos()              { return new ArrayList<>(impuestos); }
+
+    private void notificarCambio(String evento) {
+        NotificadorSistema.getInstancia().notificar(evento);
+    }
 }

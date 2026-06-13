@@ -32,6 +32,10 @@ public class Usuario {
         return rol == RolUsuario.ADMINISTRADOR;
     }
 
+    public boolean validarCredenciales(String usuario, String clave) {
+        return activo && username.equals(usuario) && password.equals(clave);
+    }
+
     public int getIdUsuario()  { return idUsuario; }
     public String getNombre()  { return nombre; }
     public String getApellido(){ return apellido; }
