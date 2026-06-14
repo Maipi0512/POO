@@ -1,6 +1,6 @@
 package farmared.ui.paneles;
 
-import farmared.modulos.m1_proveedores.Rubro;
+import farmared.modulos.m2_proveedores.Rubro;
 import farmared.sistema.observador.NotificadorSistema;
 import farmared.sistema.observador.ObservadorSistema;
 import farmared.ui.AppContext;

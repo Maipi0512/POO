@@ -1,8 +1,8 @@
 package farmared.ui.paneles;
 
-import farmared.modulos.m2_productos.Producto;
+import farmared.modulos.m3_productos.Producto;
 import farmared.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.modulos.m8_usuarios.Usuario;
+import farmared.modulos.m1_usuarios.Usuario;
 import farmared.sistema.SistemaGestionCompras;
 import farmared.ui.AppContext;
 import farmared.ui.util.CarritoUtil;

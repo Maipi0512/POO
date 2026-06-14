@@ -1,6 +1,6 @@
 package farmared.ui;
 
-import farmared.modulos.m8_usuarios.Usuario;
+import farmared.modulos.m1_usuarios.Usuario;
 import farmared.ui.util.UiUtil;
 
 import javax.swing.*;

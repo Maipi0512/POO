@@ -1,10 +1,10 @@
 package farmared.ui.paneles;
 
 import farmared.enums.TipoComprobante;
-import farmared.modulos.m2_productos.Producto;
+import farmared.modulos.m3_productos.Producto;
 import farmared.modulos.m5_comprobantes.Comprobante;
 import farmared.modulos.m5_comprobantes.DetalleComprobante;
-import farmared.modulos.m8_usuarios.Usuario;
+import farmared.modulos.m1_usuarios.Usuario;
 import farmared.sistema.SistemaGestionCompras;
 import farmared.sistema.observador.NotificadorSistema;
 import farmared.sistema.observador.ObservadorSistema;

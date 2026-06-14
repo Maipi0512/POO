@@ -1,13 +1,13 @@
 package farmared.sistema;
 
 import farmared.enums.*;
-import farmared.modulos.m1_proveedores.*;
-import farmared.modulos.m2_productos.*;
-import farmared.modulos.m3_impuestos.*;
+import farmared.modulos.m2_proveedores.*;
+import farmared.modulos.m3_productos.*;
+import farmared.modulos.m6_ordenes_pago.*;
 import farmared.modulos.m4_ordenes_compra.*;
 import farmared.modulos.m5_comprobantes.*;
 import farmared.modulos.m6_ordenes_pago.*;
-import farmared.modulos.m8_usuarios.*;
+import farmared.modulos.m1_usuarios.*;
 import farmared.dominio.vo.CUIT;
 import farmared.sistema.observador.NotificadorSistema;
 import java.util.*;

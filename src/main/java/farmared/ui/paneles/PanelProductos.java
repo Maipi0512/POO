@@ -1,10 +1,10 @@
 package farmared.ui.paneles;
 
 import farmared.enums.TipoIVA;
-import farmared.modulos.m1_proveedores.Proveedor;
-import farmared.modulos.m1_proveedores.Rubro;
-import farmared.modulos.m2_productos.PrecioAcordado;
-import farmared.modulos.m2_productos.Producto;
+import farmared.modulos.m2_proveedores.Proveedor;
+import farmared.modulos.m2_proveedores.Rubro;
+import farmared.modulos.m3_productos.PrecioAcordado;
+import farmared.modulos.m3_productos.Producto;
 import farmared.sistema.SistemaGestionCompras;
 import farmared.ui.AppContext;
 import farmared.ui.util.UiUtil;

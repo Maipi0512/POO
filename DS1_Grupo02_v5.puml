@@ -1,0 +1,90 @@
+@startuml DS1_GenerarOrdenCompra
+title DS1 - Generar Orden de Compra
+
+actor Operador
+participant "OrdenCompraController" as Ctrl
+participant Proveedor
+participant Producto
+participant PrecioAcordado
+participant OrdenCompra
+participant DetalleOC
+
+' ---- crearOrdenCompra ----
+Operador -> Ctrl : crearOrdenCompra(idProveedor)
+activate Ctrl
+    note right of Ctrl
+        Ctrl = OrdenCompraController.getInstance()
+    end note
+    loop [buscar en colección de proveedores]
+        Ctrl -> Ctrl : buscarProveedorPorId(idProveedor)
+        activate Ctrl
+            Ctrl --> Ctrl : unProveedor
+        deactivate Ctrl
+    end
+    note right of Ctrl
+        unProveedor queda referenciado
+        en la instancia del controller
+    end note
+    create OrdenCompra
+    Ctrl -> OrdenCompra : new OrdenCompra(unProveedor)
+    activate OrdenCompra
+        OrdenCompra --> Ctrl : unaOrdenCompra
+    deactivate OrdenCompra
+    Ctrl --> Operador : listo para agregar items
+deactivate Ctrl
+
+' ---- agregarItem (loop) ----
+loop LoopAgregarItems
+    Operador -> Ctrl : agregarItem(unaOrdenCompra, codigoProducto, cantidad)
+    activate Ctrl
+        loop [buscar en colección de productos]
+            Ctrl -> Ctrl : buscarProductoPorCodigo(codigoProducto)
+            activate Ctrl
+                Ctrl --> Ctrl : unProducto
+            deactivate Ctrl
+        end
+        Ctrl -> Producto : obtenerUltimoPrecio(unProveedor)
+        activate Producto
+            Producto -> PrecioAcordado : estaVigente()
+            activate PrecioAcordado
+                PrecioAcordado --> Producto : true
+            deactivate PrecioAcordado
+            Producto --> Ctrl : unPrecio : double
+        deactivate Producto
+        create DetalleOC
+        Ctrl -> DetalleOC : new DetalleOC(unProducto, cantidad, unPrecio)
+        activate DetalleOC
+            DetalleOC -> DetalleOC : calcularSubtotal()
+            DetalleOC --> Ctrl : unDetalleOC
+        deactivate DetalleOC
+        Ctrl -> OrdenCompra : agregarDetalle(unDetalleOC)
+        activate OrdenCompra
+            OrdenCompra --> Ctrl : ok
+        deactivate OrdenCompra
+        Ctrl --> Operador : item agregado
+    deactivate Ctrl
+end
+
+' ---- emitirOrdenCompra ----
+Operador -> Ctrl : emitirOrdenCompra(unaOrdenCompra)
+activate Ctrl
+    Ctrl -> OrdenCompra : calcularTotal()
+    activate OrdenCompra
+        OrdenCompra --> Ctrl : importeTotal
+    deactivate OrdenCompra
+    Ctrl -> Proveedor : validarNuevaOC(importeTotal)
+    activate Proveedor
+        note right of Proveedor
+            Verifica: importeTotal + deudaVigente
+            <= topeMaximoDeuda
+        end note
+        Proveedor --> Ctrl : true
+    deactivate Proveedor
+    Ctrl -> OrdenCompra : emitir()
+    activate OrdenCompra
+        OrdenCompra --> Ctrl : estado = EMITIDA
+    deactivate OrdenCompra
+    Ctrl --> Operador : emitida exitosamente
+deactivate Ctrl
+
+@enduml

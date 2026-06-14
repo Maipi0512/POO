@@ -2,9 +2,9 @@ package farmared.ui.paneles;
 
 import farmared.enums.CondicionIVA;
 import farmared.enums.TipoImpuesto;
-import farmared.modulos.m1_proveedores.CertificadoNoRetencion;
-import farmared.modulos.m1_proveedores.Proveedor;
-import farmared.modulos.m1_proveedores.Rubro;
+import farmared.modulos.m2_proveedores.CertificadoNoRetencion;
+import farmared.modulos.m2_proveedores.Proveedor;
+import farmared.modulos.m2_proveedores.Rubro;
 import farmared.sistema.observador.NotificadorSistema;
 import farmared.sistema.observador.ObservadorSistema;
 import farmared.ui.AppContext;

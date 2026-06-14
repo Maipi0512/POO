@@ -1,0 +1,123 @@
+@startuml DS2_EmitirOrdenPago
+title DS2 - Emitir Orden de Pago
+
+actor Operador
+participant "OrdenPagoController" as Ctrl
+participant Proveedor
+participant Comprobante
+participant OrdenPago
+participant CancelacionComprobante
+participant CertificadoNoRetencion
+participant Impuesto
+participant EscalaRetencion
+participant Retencion
+participant MedioPago
+
+' ---- iniciarOrdenPago ----
+Operador -> Ctrl : iniciarOrdenPago(idProveedor)
+activate Ctrl
+    note right of Ctrl
+        Ctrl = OrdenPagoController.getInstance()
+    end note
+    loop [buscar en colección de proveedores]
+        Ctrl -> Ctrl : buscarProveedorPorId(idProveedor)
+        activate Ctrl
+            Ctrl --> Ctrl : unProveedor
+        deactivate Ctrl
+    end
+    Ctrl -> Proveedor : obtenerCuentaCorriente()
+    activate Proveedor
+        Proveedor --> Ctrl : comprobantesImpagos
+    deactivate Proveedor
+    Ctrl --> Operador : lista de comprobantes impagos
+deactivate Ctrl
+
+' ---- seleccionarComprobantes ----
+Operador -> Ctrl : seleccionarComprobantes(comprobantes, montos)
+activate Ctrl
+    create OrdenPago
+    Ctrl -> OrdenPago : new OrdenPago(unProveedor, fechaEmision)
+    activate OrdenPago
+        OrdenPago --> Ctrl : unaOrdenPago
+    deactivate OrdenPago
+    loop [por cada comprobante seleccionado]
+        create CancelacionComprobante
+        Ctrl -> CancelacionComprobante : new CancelacionComprobante(comp, importe, esTotal)
+        activate CancelacionComprobante
+            CancelacionComprobante --> Ctrl : unaCancelacion
+        deactivate CancelacionComprobante
+        Ctrl -> OrdenPago : agregarCancelacion(unaCancelacion)
+        activate OrdenPago
+            OrdenPago --> Ctrl : ok
+        deactivate OrdenPago
+    end
+    Ctrl -> Ctrl : calcularRetenciones(unaOrdenPago, unProveedor)
+    activate Ctrl
+        loop [por cada tipo de impuesto: IVA, IIBB, Ganancias]
+            Ctrl -> Proveedor : tieneCertificadoVigente(tipoImpuesto)
+            activate Proveedor
+                Proveedor -> CertificadoNoRetencion : estaVigente(fechaActual)
+                activate CertificadoNoRetencion
+                    CertificadoNoRetencion --> Proveedor : false
+                deactivate CertificadoNoRetencion
+                Proveedor --> Ctrl : false
+            deactivate Proveedor
+            Ctrl -> Impuesto : calcularRetencion(importeBruto, unProveedor)
+            activate Impuesto
+                Impuesto -> EscalaRetencion : aplicaA(importeBruto)
+                activate EscalaRetencion
+                    EscalaRetencion --> Impuesto : true
+                deactivate EscalaRetencion
+                create Retencion
+                Impuesto -> Retencion : new Retencion(unImpuesto, base, porcentaje, importe)
+                activate Retencion
+                    Retencion --> Impuesto : unaRetencion
+                deactivate Retencion
+                Impuesto --> Ctrl : unaRetencion
+            deactivate Impuesto
+            Ctrl -> OrdenPago : agregarRetencion(unaRetencion)
+            activate OrdenPago
+                OrdenPago --> Ctrl : ok
+            deactivate OrdenPago
+        end
+        Ctrl --> Ctrl : totalRetenciones
+    deactivate Ctrl
+    Ctrl -> OrdenPago : generar()
+    activate OrdenPago
+        OrdenPago --> Ctrl : GENERADA
+    deactivate OrdenPago
+    Ctrl --> Operador : resumen: importeBruto, retenciones, importeNeto
+deactivate Ctrl
+
+' ---- confirmarPago ----
+Operador -> Ctrl : confirmarPago(unaOrdenPago, mediosPago)
+activate Ctrl
+    note right of Ctrl
+        mediosPago contiene instancias concretas:
+        Efectivo, TransferenciaBancaria o Cheque.
+        MedioPago es abstracta, no se instancia.
+    end note
+    loop [por cada medio de pago en mediosPago]
+        Ctrl -> MedioPago : procesarPago()
+        activate MedioPago
+            MedioPago --> Ctrl : true
+        deactivate MedioPago
+    end
+    Ctrl -> OrdenPago : procesarPago(mediosPago)
+    activate OrdenPago
+        OrdenPago --> Ctrl : true
+    deactivate OrdenPago
+    Ctrl -> OrdenPago : cerrarOrden()
+    activate OrdenPago
+        OrdenPago --> Ctrl : EMITIDA
+    deactivate OrdenPago
+    loop [por cada comprobante cancelado]
+        Ctrl -> Proveedor : registrarPago(importeCancelado)
+        activate Proveedor
+            Proveedor --> Ctrl : saldoPendiente actualizado
+        deactivate Proveedor
+    end
+    Ctrl --> Operador : Orden de Pago emitida exitosamente
+deactivate Ctrl
+
+@enduml

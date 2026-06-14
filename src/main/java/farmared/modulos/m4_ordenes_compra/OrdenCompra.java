@@ -45,6 +45,13 @@ public class OrdenCompra {
         return importeTotal;
     }
 
+    /** DS1: Proveedor.validarNuevaOC — true si la OC no supera el tope de deuda. */
+    public boolean validarTopeDeuda() {
+        return proveedor.validarNuevaOC(importeTotal);
+    }
+
+    public void setEstado(EstadoOrdenCompra nuevoEstado) { estado = nuevoEstado; }
+
     public void emitir() { estado = EstadoOrdenCompra.EMITIDA; }
 
     public void emitirConAutorizacion(Autorizacion auth) {

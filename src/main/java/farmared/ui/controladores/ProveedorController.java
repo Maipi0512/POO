@@ -2,8 +2,8 @@ package farmared.ui.controladores;
 
 import farmared.dominio.vo.CUIT;
 import farmared.enums.CondicionIVA;
-import farmared.modulos.m1_proveedores.Proveedor;
-import farmared.modulos.m1_proveedores.Rubro;
+import farmared.modulos.m2_proveedores.Proveedor;
+import farmared.modulos.m2_proveedores.Rubro;
 import farmared.sistema.SistemaGestionCompras;
 
 import java.util.Date;

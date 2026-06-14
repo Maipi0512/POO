@@ -1,10 +1,10 @@
 package farmared.ui;
 
 import farmared.enums.*;
-import farmared.modulos.m1_proveedores.*;
-import farmared.modulos.m2_productos.*;
-import farmared.modulos.m3_impuestos.*;
-import farmared.modulos.m8_usuarios.*;
+import farmared.modulos.m2_proveedores.*;
+import farmared.modulos.m3_productos.*;
+import farmared.modulos.m6_ordenes_pago.*;
+import farmared.modulos.m1_usuarios.*;
 import farmared.sistema.SistemaGestionCompras;
 
 import java.util.Date;

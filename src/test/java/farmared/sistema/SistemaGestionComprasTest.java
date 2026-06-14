@@ -1,11 +1,11 @@
 package farmared.sistema;
 
 import farmared.enums.*;
-import farmared.modulos.m2_productos.Producto;
+import farmared.modulos.m3_productos.Producto;
 import farmared.modulos.m4_ordenes_compra.OrdenCompra;
 import farmared.modulos.m5_comprobantes.DetalleComprobante;
 import farmared.modulos.m5_comprobantes.Factura;
-import farmared.modulos.m3_impuestos.ImpuestoGanancias;
+import farmared.modulos.m6_ordenes_pago.ImpuestoGanancias;
 import farmared.modulos.m6_ordenes_pago.Efectivo;
 import farmared.modulos.m6_ordenes_pago.TransferenciaBancaria;
 import farmared.enums.EstadoOrdenCompra;
