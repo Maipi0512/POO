@@ -38,7 +38,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>farmared.ui.FarmaredApp</mainClass>
+              <mainClass>farmared.Main</mainClass>
             </manifest>
           </archive>
         </configuration>

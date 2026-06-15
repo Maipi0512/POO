@@ -1,5 +1,8 @@
-package farmared.dominio.vo;
+﻿package farmared.dominio.vo;
 
+import farmared.modelo.modulos.m1_proveedores.CUIT;
+import farmared.modelo.modulos.m2_productos.Precio;
+import farmared.modelo.modulos.m3_impuestos.Porcentaje;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

@@ -1,15 +1,16 @@
-package farmared.sistema;
+﻿package farmared.sistema;
 
-import farmared.enums.*;
-import farmared.modulos.m3_productos.Producto;
-import farmared.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.modulos.m5_comprobantes.DetalleComprobante;
-import farmared.modulos.m5_comprobantes.Factura;
-import farmared.modulos.m6_ordenes_pago.ImpuestoGanancias;
-import farmared.modulos.m6_ordenes_pago.Efectivo;
-import farmared.modulos.m6_ordenes_pago.TransferenciaBancaria;
-import farmared.enums.EstadoOrdenCompra;
-import farmared.ui.DatosIniciales;
+import farmared.modelo.enums.*;
+import farmared.modelo.modulos.m2_productos.Producto;
+import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
+import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
+import farmared.modelo.modulos.m5_comprobantes.Factura;
+import farmared.modelo.modulos.m3_impuestos.ImpuestoGanancias;
+import farmared.modelo.modulos.m6_ordenes_pago.Efectivo;
+import farmared.modelo.modulos.m6_ordenes_pago.TransferenciaBancaria;
+import farmared.modelo.SistemaGestionCompras;
+import farmared.modelo.enums.EstadoOrdenCompra;
+import farmared.vistas.DatosIniciales;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -104,7 +105,7 @@ public class SistemaGestionComprasTest {
                 sistema.listarSupervisores().get(0), "Test"
         );
 
-        Map<farmared.modulos.m5_comprobantes.Comprobante, Double> sel = new LinkedHashMap<>();
+        Map<farmared.modelo.modulos.m5_comprobantes.Comprobante, Double> sel = new LinkedHashMap<>();
         sel.put(factura, factura.getSaldoPendiente());
 
         var op = sistema.prepararOrdenPago("20-12345678-9", sel, new Date());
@@ -176,14 +177,14 @@ public class SistemaGestionComprasTest {
                 sistema.listarSupervisores().get(0), "Test"
         );
 
-        Map<farmared.modulos.m5_comprobantes.Comprobante, Double> sel = new LinkedHashMap<>();
+        Map<farmared.modelo.modulos.m5_comprobantes.Comprobante, Double> sel = new LinkedHashMap<>();
         sel.put(factura, factura.getSaldoPendiente());
         var op = sistema.prepararOrdenPago("20-12345678-9", sel, new Date());
 
         double mitad = Math.round(op.getImporteNeto() / 2.0 * 100.0) / 100.0;
         double resto = Math.round((op.getImporteNeto() - mitad) * 100.0) / 100.0;
 
-        List<farmared.modulos.m6_ordenes_pago.MedioPago> medios = Arrays.asList(
+        List<farmared.modelo.modulos.m6_ordenes_pago.MedioPago> medios = Arrays.asList(
                 new Efectivo(1, mitad, new Date()),
                 new TransferenciaBancaria(2, resto, new Date(), "111", "222", "OP-001")
         );
