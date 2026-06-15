@@ -33,6 +33,7 @@ public class PanelComprobantes extends JPanel {
     private final JTable tablaComprobantes = new JTable();
 
     private final List<DetalleComprobante> detallesPendientes = new ArrayList<>();
+    private final List<Comprobante> comprobantesTabla = new ArrayList<>();
 
     public PanelComprobantes() {
         setLayout(new BorderLayout(8, 8));
@@ -74,6 +75,9 @@ public class PanelComprobantes extends JPanel {
         quitar.addActionListener(e -> quitarLinea());
         registrar.addActionListener(e -> registrarComprobante());
         limpiar.addActionListener(e -> limpiarDetalle());
+        tablaComprobantes.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) verComprobanteSeleccionado();
+        });
 
         JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(tablaDetalle), new JScrollPane(tablaComprobantes));
@@ -94,7 +98,9 @@ public class PanelComprobantes extends JPanel {
 
         DefaultTableModel model = (DefaultTableModel) tablaComprobantes.getModel();
         model.setRowCount(0);
+        comprobantesTabla.clear();
         for (Comprobante c : ctrl.listar()) {
+            comprobantesTabla.add(c);
             model.addRow(new Object[]{
                     c.getNumero(), c.getTipo(), c.getProveedor().getRazonSocial(),
                     c.getDetalles().size(), UiUtil.formatearMoneda(c.getImporteNeto()),
@@ -204,7 +210,36 @@ public class PanelComprobantes extends JPanel {
         return item.split(" - ")[0];
     }
 
-    private void limpiarDetalle() { detallesPendientes.clear(); refrescarTablaDetalle(); }
+    private void limpiarDetalle() {
+        detallesPendientes.clear();
+        tablaComprobantes.clearSelection();
+        refrescarTablaDetalle();
+    }
+
+    private void verComprobanteSeleccionado() {
+        int fila = tablaComprobantes.getSelectedRow();
+        if (fila < 0 || fila >= comprobantesTabla.size()) {
+            refrescarTablaDetalle();
+            return;
+        }
+        Comprobante c = comprobantesTabla.get(fila);
+        DefaultTableModel model = (DefaultTableModel) tablaDetalle.getModel();
+        model.setRowCount(0);
+        for (DetalleComprobante d : c.getDetalles()) {
+            model.addRow(new Object[]{
+                    d.getNroLinea(), d.getProducto().getCodigoInterno(), d.getProducto().getDescripcion(),
+                    d.getCantidad(), UiUtil.formatearMoneda(d.getPrecioUnitario()),
+                    d.getAlicuotaIVA() + "%", UiUtil.formatearMoneda(d.getSubtotal()),
+                    UiUtil.formatearMoneda(d.getTotalConIVA())
+            });
+        }
+        lblResumen.setText(String.format("[%s %s] Neto: %s | Total: %s | Saldo: %s | %s",
+                c.getTipo(), c.getNumero(),
+                UiUtil.formatearMoneda(c.getImporteNeto()),
+                UiUtil.formatearMoneda(c.getImporteTotal()),
+                UiUtil.formatearMoneda(c.getSaldoPendiente()),
+                c.getEstado()));
+    }
 
     private void refrescarTablaDetalle() {
         DefaultTableModel model = (DefaultTableModel) tablaDetalle.getModel();

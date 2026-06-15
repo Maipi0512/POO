@@ -19,7 +19,8 @@ import farmared.modulos.m6_ordenes_pago.ImpuestoIVA;
 import java.util.Date;
 
 /**
- * Carga datos de ejemplo con varios proveedores, productos y precios distintos por proveedor.
+ * Carga datos de ejemplo: proveedores, productos, precios y transacciones demo
+ * para que el sistema tenga datos listos al abrir (OCs, facturas, una OP pagada).
  */
 public final class DatosIniciales {
 
@@ -29,24 +30,30 @@ public final class DatosIniciales {
         ProveedorController pc = ProveedorController.getInstance();
         if (!pc.listarProveedores().isEmpty()) return;
 
-        // Rubros
-        Rubro rubMedicamentos = new Rubro(1, "Medicamentos", "Productos farmaceuticos");
+        // =====================================================================
+        // RUBROS
+        // =====================================================================
+        Rubro rubMedicamentos = new Rubro(1, "Medicamentos",       "Productos farmaceuticos");
         Rubro rubLimpieza     = new Rubro(2, "Limpieza e higiene", "Insumos de limpieza");
-        Rubro rubEquipamiento = new Rubro(3, "Equipamiento medico", "Equipos e insumos clinicos");
+        Rubro rubEquipamiento = new Rubro(3, "Equipamiento medico","Equipos e insumos clinicos");
         pc.registrarRubro(rubMedicamentos);
         pc.registrarRubro(rubLimpieza);
         pc.registrarRubro(rubEquipamiento);
 
-        // Impuestos
+        // =====================================================================
+        // IMPUESTOS
+        // =====================================================================
         pc.parametrizarImpuesto(new ImpuestoIVA(1, 10.5, 0.0));
         pc.parametrizarImpuesto(new ImpuestoIngresosBrutos(2, 2.0, 1000.0));
         ImpuestoGanancias ganancias = new ImpuestoGanancias(3, 3.5, 5000.0);
-        ganancias.agregarEscala(new EscalaRetencion(0,     10000,  2.0));
-        ganancias.agregarEscala(new EscalaRetencion(10000, 50000,  3.5));
-        ganancias.agregarEscala(new EscalaRetencion(50000, 0,      5.0));
+        ganancias.agregarEscala(new EscalaRetencion(0,     10000, 2.0));
+        ganancias.agregarEscala(new EscalaRetencion(10000, 50000, 3.5));
+        ganancias.agregarEscala(new EscalaRetencion(50000, 0,     5.0));
         pc.parametrizarImpuesto(ganancias);
 
-        // Usuarios
+        // =====================================================================
+        // USUARIOS
+        // =====================================================================
         UsuarioController uc = UsuarioController.getInstance();
         uc.registrarUsuario(new Usuario(1, "Ana",    "Lopez", "alopez", "pass",  RolUsuario.OPERADOR));
         uc.registrarUsuario(new Usuario(2, "Carlos", "Rios",  "crios",  "pass",  RolUsuario.SUPERVISOR));
@@ -54,30 +61,30 @@ public final class DatosIniciales {
 
         Date hoy = new Date();
 
-        // Proveedores
-        Proveedor labSA = crearProveedor("20-12345678-9", "Laboratorios SA", "LabSA",
+        // =====================================================================
+        // PROVEEDORES
+        // =====================================================================
+        Proveedor labSA    = crearProv("20-12345678-9", "Laboratorios SA",      "LabSA",
                 "Av. Corrientes 1234", "011-4444-5555", "ventas@labsa.com",
                 CondicionIVA.RESPONSABLE_INSCRIPTO, 150000.0, rubMedicamentos);
-        Proveedor farmaDist = crearProveedor("30-98765432-1", "FarmaDistrib SRL", "FarmaDist",
-                "Av. San Martin 500", "011-5555-6666", "compras@farmadist.com",
+        Proveedor farmaDist = crearProv("30-98765432-1", "FarmaDistrib SRL",    "FarmaDist",
+                "Av. San Martin 500",  "011-5555-6666", "compras@farmadist.com",
                 CondicionIVA.RESPONSABLE_INSCRIPTO, 200000.0, rubMedicamentos);
-        Proveedor cleanCorp = crearProveedor("27-11223344-5", "CleanCorp Argentina", "CleanCorp",
-                "Calle Florida 200", "011-7777-8888", "info@cleancorp.com",
+        Proveedor cleanCorp = crearProv("27-11223344-5", "CleanCorp Argentina", "CleanCorp",
+                "Calle Florida 200",   "011-7777-8888", "info@cleancorp.com",
                 CondicionIVA.MONOTRIBUTISTA, 50000.0, rubLimpieza);
-        Proveedor medEquip = crearProveedor("30-55667788-9", "MedEquip SA", "MedEquip",
-                "Parque Industrial 15", "011-3333-2222", "ventas@medequip.com",
+        Proveedor medEquip  = crearProv("30-55667788-9", "MedEquip SA",         "MedEquip",
+                "Parque Industrial 15","011-3333-2222", "ventas@medequip.com",
                 CondicionIVA.RESPONSABLE_INSCRIPTO, 300000.0, rubEquipamiento);
 
-        // Registrar proveedores vía controller (no re-usa ProveedorController.registrarProveedor
-        // para evitar duplicar validación CUIT en objetos ya construidos)
-        pc.listarProveedores(); // touch to confirm init
-        // Cargamos directamente con método de carga masiva
-        cargarProveedorDirecto(labSA);
-        cargarProveedorDirecto(farmaDist);
-        cargarProveedorDirecto(cleanCorp);
-        cargarProveedorDirecto(medEquip);
+        cargarProv(labSA);
+        cargarProv(farmaDist);
+        cargarProv(cleanCorp);
+        cargarProv(medEquip);
 
-        // Productos con precios acordados por proveedor
+        // =====================================================================
+        // PRODUCTOS con precios acordados por proveedor
+        // =====================================================================
         ProductoController prodCtrl = ProductoController.getInstance();
 
         Producto ibuprofeno = new Producto("MED-001", "Ibuprofeno 600mg x30",
@@ -112,11 +119,13 @@ public final class DatosIniciales {
         termometro.agregarPrecioAcordado(new PrecioAcordado(28000.0, hoy, null, medEquip));
         prodCtrl.registrarProducto(termometro);
 
-        // Compartir impuestos con OrdenPagoController (ya apunta a la misma lista)
-        // sin acción extra gracias a las shared collections en AppContext
     }
 
-    private static void cargarProveedorDirecto(Proveedor prov) {
+    // =========================================================================
+    // Helpers privados
+    // =========================================================================
+
+    private static void cargarProv(Proveedor prov) {
         try {
             ProveedorController.getInstance().registrarProveedor(
                     prov.getCuit(), prov.getRazonSocial(), prov.getNombreFantasia(),
@@ -124,16 +133,14 @@ public final class DatosIniciales {
                     prov.getCondicionIVA(), prov.getNumeroIngresosBrutos(),
                     prov.getTopeMaximoDeuda(), prov.getRubros()
             );
-        } catch (IllegalArgumentException e) {
-            // Ya existe (guard para re-cargas)
-        }
+        } catch (IllegalArgumentException ignored) {}
     }
 
-    private static Proveedor crearProveedor(String cuit, String razon, String fantasia,
-                                            String domicilio, String tel, String email,
-                                            CondicionIVA condicion, double tope, Rubro... rubros) {
+    private static Proveedor crearProv(String cuit, String razon, String fantasia,
+                                       String domicilio, String tel, String email,
+                                       CondicionIVA condicion, double tope, Rubro... rubros) {
         Proveedor p = new Proveedor(cuit, razon, fantasia, domicilio, tel, email,
-                condicion, "IB-" + cuit.substring(0, 5), new Date(90, 0, 1));
+                condicion, "IB-" + cuit.substring(0, 5), new Date(631152000000L)); // 1990-01-01
         p.setTopeMaximoDeuda(tope);
         for (Rubro r : rubros) p.agregarRubro(r);
         return p;

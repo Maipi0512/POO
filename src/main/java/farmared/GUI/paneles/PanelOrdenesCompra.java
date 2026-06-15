@@ -2,6 +2,7 @@ package farmared.GUI.paneles;
 
 import farmared.controladores.OrdenCompraController;
 import farmared.modulos.m3_productos.Producto;
+import farmared.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modulos.m4_ordenes_compra.OrdenCompra;
 import farmared.modulos.m1_usuarios.Usuario;
 import farmared.GUI.AppContext;
@@ -26,6 +27,7 @@ public class PanelOrdenesCompra extends JPanel {
     private final JLabel lblCarrito = new JLabel("Carrito: 0 item(s) | Total: $0.00");
 
     private final List<ItemCarritoOC> carrito = new ArrayList<>();
+    private final List<OrdenCompra> ocsTabla = new ArrayList<>();
     private String cuitProveedorActual;
 
     private static class ItemCarritoOC {
@@ -86,6 +88,9 @@ public class PanelOrdenesCompra extends JPanel {
         quitarItem.addActionListener(e -> quitarItem());
         vaciar.addActionListener(e -> vaciarCarrito());
         emitir.addActionListener(e -> emitirOC());
+        tablaOC.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) verOCSeleccionada();
+        });
 
         JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(tablaDetalle), new JScrollPane(tablaOC));
@@ -104,7 +109,9 @@ public class PanelOrdenesCompra extends JPanel {
 
         DefaultTableModel model = (DefaultTableModel) tablaOC.getModel();
         model.setRowCount(0);
+        ocsTabla.clear();
         for (OrdenCompra oc : ctrl.getOrdenesCompra()) {
+            ocsTabla.add(oc);
             model.addRow(new Object[]{
                     oc.getNumero(), oc.getProveedor().getRazonSocial(), oc.getDetalles().size(),
                     UiUtil.formatearFecha(oc.getFechaEmision()),
@@ -165,6 +172,7 @@ public class PanelOrdenesCompra extends JPanel {
             if (precio <= 0) throw new IllegalArgumentException("El precio debe ser mayor a cero.");
             carrito.add(new ItemCarritoOC(producto, cant, precio));
             cantidad.setText("");
+            tablaOC.clearSelection();
             refrescarCarrito();
         } catch (Exception ex) { UiUtil.mostrarError(this, ex.getMessage()); }
     }
@@ -172,10 +180,12 @@ public class PanelOrdenesCompra extends JPanel {
     private void quitarItem() {
         int fila = tablaDetalle.getSelectedRow();
         if (fila < 0) { UiUtil.mostrarError(this, "Seleccione una linea del carrito."); return; }
-        carrito.remove(fila); refrescarCarrito();
+        carrito.remove(fila);
+        tablaOC.clearSelection();
+        refrescarCarrito();
     }
 
-    private void vaciarCarrito() { carrito.clear(); refrescarCarrito(); }
+    private void vaciarCarrito() { carrito.clear(); tablaOC.clearSelection(); refrescarCarrito(); }
 
     private void emitirOC() {
         if (carrito.isEmpty()) { UiUtil.mostrarError(this, "Agregue al menos un item al carrito."); return; }
@@ -230,5 +240,26 @@ public class PanelOrdenesCompra extends JPanel {
         }
         lblCarrito.setText(String.format("Carrito: %d item(s) | Total: %s",
                 carrito.size(), UiUtil.formatearMoneda(total)));
+    }
+
+    private void verOCSeleccionada() {
+        int fila = tablaOC.getSelectedRow();
+        if (fila < 0 || fila >= ocsTabla.size()) {
+            refrescarCarrito();
+            return;
+        }
+        OrdenCompra oc = ocsTabla.get(fila);
+        DefaultTableModel model = (DefaultTableModel) tablaDetalle.getModel();
+        model.setRowCount(0);
+        for (DetalleOC d : oc.getDetalles()) {
+            model.addRow(new Object[]{
+                    d.getNroLinea(), d.getProducto().getCodigoInterno(), d.getProducto().getDescripcion(),
+                    d.getCantidad(), UiUtil.formatearMoneda(d.getPrecioUnitario()),
+                    UiUtil.formatearMoneda(d.getSubtotal())
+            });
+        }
+        lblCarrito.setText(String.format("[OC %s] %d item(s) | Total: %s | Estado: %s",
+                oc.getNumero(), oc.getDetalles().size(),
+                UiUtil.formatearMoneda(oc.getImporteTotal()), oc.getEstado()));
     }
 }
