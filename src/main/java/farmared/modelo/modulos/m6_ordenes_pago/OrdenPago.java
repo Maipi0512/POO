@@ -1,8 +1,13 @@
 ﻿package farmared.modelo.modulos.m6_ordenes_pago;
 
+<<<<<<< HEAD:src/main/java/farmared/modelo/modulos/m6_ordenes_pago/OrdenPago.java
 import farmared.modelo.enums.EstadoOrdenPago;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
 import farmared.modelo.modulos.m3_impuestos.Retencion;
+=======
+import farmared.enums.EstadoOrdenPago;
+import farmared.modulos.m2_proveedores.Proveedor;
+>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/modulos/m6_ordenes_pago/OrdenPago.java
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

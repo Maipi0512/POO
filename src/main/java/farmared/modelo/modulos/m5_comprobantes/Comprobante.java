@@ -67,6 +67,11 @@ public abstract class Comprobante {
         recalcularTotales();
     }
 
+    /** DS3: recalcula importeNeto, importeIVA e importeTotal a partir de los detalles actuales. */
+    public void calcularImpuestos() {
+        recalcularTotales();
+    }
+
     private void recalcularTotales() {
         importeNeto = 0.0;
         importeIVA  = 0.0;

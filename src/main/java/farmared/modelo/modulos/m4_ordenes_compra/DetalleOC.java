@@ -16,7 +16,12 @@ public class DetalleOC {
         this.producto = producto;
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
-        this.subtotal = Math.round(cantidad * precioUnitario * 100.0) / 100.0;
+        this.subtotal = calcularSubtotal();
+    }
+
+    /** DS1: calcula el subtotal de la línea (cantidad × precioUnitario). */
+    public double calcularSubtotal() {
+        return Math.round(cantidad * precioUnitario * 100.0) / 100.0;
     }
 
     public int getNroLinea()          { return nroLinea; }

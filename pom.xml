@@ -25,7 +25,7 @@
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-    <testSourceDirectory>src/test/java</testSourceDirectory>
+    <testSourceDirectory>src/main/test/java</testSourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -38,7 +38,11 @@
         <configuration>
           <archive>
             <manifest>
+<<<<<<< HEAD
               <mainClass>farmared.Main</mainClass>
+=======
+              <mainClass>farmared.GUI.FarmaredApp</mainClass>
+>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
             </manifest>
           </archive>
         </configuration>

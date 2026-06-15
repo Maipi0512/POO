@@ -50,6 +50,9 @@ public class OrdenCompra {
         return proveedor.validarNuevaOC(importeTotal);
     }
 
+    /** DS3: actualiza el estado de la OC según la cobertura de facturación. */
+    public void actualizarEstado(EstadoOrdenCompra nuevoEstado) { estado = nuevoEstado; }
+
     public void setEstado(EstadoOrdenCompra nuevoEstado) { estado = nuevoEstado; }
 
     public void emitir() { estado = EstadoOrdenCompra.EMITIDA; }
@@ -75,7 +78,6 @@ public class OrdenCompra {
 
     @Override
     public String toString() {
-        return "OC{" + numero + ", prov=" + proveedor.getRazonSocial()
-                + ", total=$" + importeTotal + ", estado=" + estado + "}";
+        return numero + " | " + proveedor.getRazonSocial() + " | $" + importeTotal + " [" + estado + "]";
     }
 }
