@@ -25,7 +25,15 @@ public class Rubro {
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
     @Override
-    public String toString() {
-        return "Rubro{" + idRubro + " - " + nombre + "}";
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Rubro)) return false;
+        return idRubro == ((Rubro) o).idRubro;
     }
+
+    @Override
+    public int hashCode() { return Integer.hashCode(idRubro); }
+
+    @Override
+    public String toString() { return nombre; }
 }

@@ -58,21 +58,28 @@ public class Proveedor {
     // CUENTA CORRIENTE (RF-21, DS4)
     // =========================================================================
 
-    /**
-     * DS4 paso 4-8: loop afectarCuentaCorriente() → calcularDeudaVigente() → totalDeudaVigente.
-     * Facturas/ND suman, NotasCredito restan.
-     */
+    /** DS4: retorna la deuda vigente total del proveedor. Delega a calcularDeudaVigente(). */
     public double obtenerCuentaCorriente() {
+        return calcularDeudaVigente();
+    }
+
+    /** DS4: suma afectarCuentaCorriente() de cada comprobante y retorna el total normalizado. */
+    public double calcularDeudaVigente() {
         double acumulado = 0.0;
         for (Comprobante c : comprobantes) {
             acumulado += c.afectarCuentaCorriente();
         }
-        return calcularDeudaVigente(acumulado);
+        return Math.round(acumulado * 100.0) / 100.0;
     }
 
-    /** DS4 paso 7: self-call para normalizar el total acumulado. */
-    private double calcularDeudaVigente(double suma) {
-        return Math.round(suma * 100.0) / 100.0;
+    /** DS3: punto de notificación explícita cuando un comprobante afecta la deuda del proveedor. */
+    public void actualizarDeuda(double delta) {
+        // La deuda se recalcula dinámicamente en calcularDeudaVigente().
+    }
+
+    /** DS2: punto de notificación cuando se registra un pago sobre uno de sus comprobantes. */
+    public void registrarPago(double importeCancelado) {
+        // El pago ya fue aplicado en Comprobante.registrarPago() dentro de OrdenPago.cerrarOrden().
     }
 
     public void agregarComprobante(Comprobante comprobante) {
@@ -121,6 +128,11 @@ public class Proveedor {
         if (!rubros.contains(rubro)) rubros.add(rubro);
     }
 
+    public void reemplazarRubros(List<Rubro> nuevosRubros) {
+        rubros.clear();
+        if (nuevosRubros != null) rubros.addAll(nuevosRubros);
+    }
+
     // =========================================================================
     // GETTERS Y SETTERS
     // =========================================================================
@@ -148,6 +160,16 @@ public class Proveedor {
     public void setCondicionIVA(CondicionIVA v) { condicionIVA = v; }
     public void setTopeMaximoDeuda(double v)    { topeMaximoDeuda = v; }
     public void setActivo(boolean v)            { activo = v; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Proveedor)) return false;
+        return cuit.equals(((Proveedor) o).cuit);
+    }
+
+    @Override
+    public int hashCode() { return cuit.hashCode(); }
 
     @Override
     public String toString() {

@@ -2,7 +2,6 @@ package farmared.modulos.m6_ordenes_pago;
 
 import farmared.enums.EstadoOrdenPago;
 import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m6_ordenes_pago.Retencion;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
