@@ -1,71 +1,12 @@
-<<<<<<< HEAD
-﻿package farmared.controladores;
-
-import farmared.modelo.modulos.m1_proveedores.CUIT;
-import farmared.modelo.enums.CondicionIVA;
-import farmared.modelo.modulos.m1_proveedores.Proveedor;
-import farmared.modelo.modulos.m1_proveedores.Rubro;
-import farmared.modelo.SistemaGestionCompras;
-
-import java.util.Date;
-import java.util.List;
-
-/** Controlador MVC del modulo de proveedores y rubros. */
-public class ProveedorController {
-
-    private final SistemaGestionCompras sistema;
-
-    public ProveedorController(SistemaGestionCompras sistema) {
-        this.sistema = sistema;
-    }
-
-    public List<Proveedor> listar() {
-        return sistema.getProveedores();
-    }
-
-    public List<Rubro> listarRubros() {
-        return sistema.getRubros();
-    }
-
-    public void registrarProveedor(String cuit, String razonSocial, String nombreFantasia,
-                                   String domicilio, String telefono, String email,
-                                   CondicionIVA condicionIVA, String ingresosBrutos,
-                                   double topeDeuda, List<Rubro> rubrosSeleccionados) {
-        new CUIT(cuit);
-
-        Proveedor prov = new Proveedor(
-                cuit, razonSocial, nombreFantasia, domicilio, telefono, email,
-                condicionIVA, ingresosBrutos, new Date()
-        );
-        prov.setTopeMaximoDeuda(topeDeuda);
-        for (Rubro r : rubrosSeleccionados) prov.agregarRubro(r);
-
-        sistema.registrarProveedor(prov);
-    }
-
-    public void modificarProveedor(String cuit, String razonSocial, String nombreFantasia,
-                                    String domicilio, String telefono, String email,
-                                    CondicionIVA condicionIVA, double topeDeuda) {
-        sistema.modificarProveedor(cuit, razonSocial, nombreFantasia, domicilio,
-                telefono, email, condicionIVA, topeDeuda);
-    }
-
-    public void darBajaProveedor(String cuit) {
-        sistema.darBajaProveedor(cuit);
-    }
-
-    public Rubro registrarRubro(String nombre, String descripcion) {
-        return sistema.registrarRubro(nombre, descripcion);
-=======
 package farmared.controladores;
 
-import farmared.enums.CondicionIVA;
-import farmared.enums.TipoImpuesto;
-import farmared.modulos.m1_usuarios.Usuario;
-import farmared.modulos.m2_proveedores.CertificadoNoRetencion;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m2_proveedores.Rubro;
-import farmared.modulos.m6_ordenes_pago.Impuesto;
+import farmared.modelo.enums.CondicionIVA;
+import farmared.modelo.enums.TipoImpuesto;
+import farmared.modelo.modulos.m8_usuarios.Usuario;
+import farmared.modelo.modulos.m1_proveedores.CertificadoNoRetencion;
+import farmared.modelo.modulos.m1_proveedores.Proveedor;
+import farmared.modelo.modulos.m1_proveedores.Rubro;
+import farmared.modelo.modulos.m3_impuestos.Impuesto;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -207,6 +148,5 @@ public class ProveedorController {
     private void validarCuit(String cuit) {
         if (cuit == null || !CUIT_FORMATO.matcher(cuit.trim()).matches())
             throw new IllegalArgumentException("CUIT invalido. Formato esperado: xx-xxxxxxxx-x");
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 }

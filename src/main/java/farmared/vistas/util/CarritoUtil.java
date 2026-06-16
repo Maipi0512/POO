@@ -1,8 +1,5 @@
-<<<<<<<< HEAD:src/main/java/farmared/vistas/util/CarritoUtil.java
-﻿package farmared.vistas.util;
-========
-package farmared.GUI.util;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/util/CarritoUtil.java
+package farmared.vistas.util;
+
 
 import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;

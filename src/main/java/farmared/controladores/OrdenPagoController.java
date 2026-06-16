@@ -1,26 +1,15 @@
-<<<<<<< HEAD
-﻿package farmared.controladores;
-
-import farmared.modelo.modulos.m1_proveedores.Proveedor;
-import farmared.modelo.modulos.m5_comprobantes.Comprobante;
-import farmared.modelo.modulos.m6_ordenes_pago.*;
-
-import farmared.modelo.SistemaGestionCompras;
-
-=======
 package farmared.controladores;
 
-import farmared.enums.EstadoComprobante;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m5_comprobantes.Comprobante;
-import farmared.modulos.m6_ordenes_pago.CancelacionComprobante;
-import farmared.modulos.m6_ordenes_pago.Impuesto;
-import farmared.modulos.m6_ordenes_pago.MedioPago;
-import farmared.modulos.m6_ordenes_pago.OrdenPago;
-import farmared.modulos.m6_ordenes_pago.Retencion;
+import farmared.modelo.enums.EstadoComprobante;
+import farmared.modelo.modulos.m1_proveedores.Proveedor;
+import farmared.modelo.modulos.m5_comprobantes.Comprobante;
+import farmared.modelo.modulos.m6_ordenes_pago.CancelacionComprobante;
+import farmared.modelo.modulos.m3_impuestos.Impuesto;
+import farmared.modelo.modulos.m6_ordenes_pago.MedioPago;
+import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
+import farmared.modelo.modulos.m3_impuestos.Retencion;
 
 import java.util.ArrayList;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +21,6 @@ import java.util.Map;
 public class OrdenPagoController {
 
     private static OrdenPagoController instancia;
-<<<<<<< HEAD
-    private final SistemaGestionCompras sistema;
-
-    private OrdenPagoController(SistemaGestionCompras sistema) {
-        this.sistema = sistema;
-    }
-
-    public static void inicializar(SistemaGestionCompras sistema) {
-        instancia = new OrdenPagoController(sistema);
-=======
 
     private final List<Proveedor>  proveedores;
     private final List<Impuesto>   impuestos;
@@ -58,7 +37,6 @@ public class OrdenPagoController {
     public static void inicializar(List<Proveedor> proveedores, List<Impuesto> impuestos,
                                     List<OrdenPago> ordenesPago) {
         instancia = new OrdenPagoController(proveedores, impuestos, ordenesPago);
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     public static OrdenPagoController getInstance() {
@@ -70,15 +48,6 @@ public class OrdenPagoController {
     // DS2 paso 1: obtener comprobantes impagos
     // =========================================================================
 
-    /** DS2: busca proveedor y retorna su lista de comprobantes con saldo pendiente. */
-<<<<<<< HEAD
-    public List<Comprobante> iniciarOrdenPago(String idProveedor) {
-        return sistema.iniciarOrdenPago(idProveedor);
-    }
-
-    // =========================================================================
-    // DS2 paso 2: crear OP, cancelaciones y calcular retenciones
-=======
     public List<Comprobante> iniciarOrdenPago(String cuitProveedor) {
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
         if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado.");
@@ -92,23 +61,8 @@ public class OrdenPagoController {
 
     // =========================================================================
     // DS2 paso 2: crear OP, cancelaciones y retenciones
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     // =========================================================================
 
-    /**
-     * DS2: crea OrdenPago, agrega cancelaciones por cada comprobante seleccionado
-     * y calcula retenciones según los impuestos parametrizados y certificados del proveedor.
-     */
-<<<<<<< HEAD
-    public OrdenPago seleccionarComprobantes(String idProveedor,
-                                              Map<Comprobante, Double> seleccion,
-                                              Date fechaEmision) {
-        return sistema.prepararOrdenPago(idProveedor, seleccion, fechaEmision);
-    }
-
-    // =========================================================================
-    // DS2 paso 3: confirmar pago con medios múltiples
-=======
     public OrdenPago seleccionarComprobantes(String cuitProveedor,
                                               Map<Comprobante, Double> seleccion,
                                               Date fechaEmision) {
@@ -130,14 +84,10 @@ public class OrdenPagoController {
 
     // =========================================================================
     // DS2 paso 3: confirmar pago
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     // =========================================================================
 
     /** DS2: procesa los medios de pago y cierra la orden. */
     public OrdenPago confirmarPago(OrdenPago op, List<MedioPago> mediosPago) {
-<<<<<<< HEAD
-        return sistema.confirmarOrdenPago(op, mediosPago);
-=======
         if (!op.procesarPago(mediosPago))
             throw new IllegalStateException(
                 "Medios de pago invalidos o no cubren el neto $" + op.getImporteNeto());
@@ -161,25 +111,12 @@ public class OrdenPagoController {
             if (importe > 0)
                 op.agregarRetencion(new Retencion(imp, base, imp.determinarPorcentaje(base), importe));
         }
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     // =========================================================================
     // Consultas
     // =========================================================================
 
-<<<<<<< HEAD
-    public List<OrdenPago> getOrdenesEmitidas() {
-        return sistema.reporteOrdenesPago();
-    }
-
-    public Proveedor buscarProveedorPorId(String cuit) {
-        return sistema.buscarProveedorPorId(cuit);
-    }
-
-    public List<Proveedor> getProveedores() {
-        return sistema.getProveedores();
-=======
     public Proveedor buscarProveedorPorId(String cuit) {
         for (Proveedor p : proveedores)
             if (p.getCuit().equals(cuit)) return p;
@@ -194,6 +131,5 @@ public class OrdenPagoController {
         for (OrdenPago op : ordenesPago)
             if (op.getProveedor().getCuit().equals(cuit)) resultado.add(op);
         return resultado;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 }

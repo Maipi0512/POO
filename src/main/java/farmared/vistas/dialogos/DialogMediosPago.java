@@ -1,14 +1,8 @@
-<<<<<<<< HEAD:src/main/java/farmared/vistas/dialogos/DialogMediosPago.java
-﻿package farmared.vistas.dialogos;
+package farmared.vistas.dialogos;
 
 import farmared.modelo.modulos.m6_ordenes_pago.*;
 import farmared.vistas.util.UiUtil;
-========
-package farmared.GUI.dialogos;
 
-import farmared.modulos.m6_ordenes_pago.*;
-import farmared.GUI.util.UiUtil;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/dialogos/DialogMediosPago.java
 
 import javax.swing.*;
 import java.awt.*;

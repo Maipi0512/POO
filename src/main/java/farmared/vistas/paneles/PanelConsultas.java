@@ -1,24 +1,13 @@
-<<<<<<<< HEAD:src/main/java/farmared/vistas/paneles/PanelConsultas.java
-﻿package farmared.vistas.paneles;
+package farmared.vistas.paneles;
 
 import farmared.modelo.enums.TipoImpuesto;
 import farmared.modelo.modulos.m5_comprobantes.Comprobante;
 import farmared.modelo.modulos.m5_comprobantes.Factura;
 import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
-import farmared.modelo.SistemaGestionCompras;
 import farmared.controladores.AppContext;
-import farmared.vistas.util.UiUtil;
-========
-package farmared.GUI.paneles;
-
 import farmared.controladores.ReportesController;
-import farmared.enums.TipoImpuesto;
-import farmared.modulos.m5_comprobantes.Comprobante;
-import farmared.modulos.m5_comprobantes.Factura;
-import farmared.modulos.m6_ordenes_pago.OrdenPago;
-import farmared.GUI.AppContext;
-import farmared.GUI.util.UiUtil;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/paneles/PanelConsultas.java
+import farmared.vistas.util.UiUtil;
+
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

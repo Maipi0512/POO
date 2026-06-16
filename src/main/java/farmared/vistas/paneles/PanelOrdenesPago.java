@@ -1,4 +1,4 @@
-﻿package farmared.vistas.paneles;
+package farmared.vistas.paneles;
 
 import farmared.modelo.modulos.m5_comprobantes.Comprobante;
 import farmared.modelo.modulos.m6_ordenes_pago.MedioPago;
@@ -6,7 +6,7 @@ import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
 import farmared.vistas.observador.NotificadorSistema;
 import farmared.vistas.observador.ObservadorSistema;
 import farmared.controladores.AppContext;
-import farmared.controladores.OrdenPagoVistaController;
+import farmared.controladores.OrdenPagoController;
 import farmared.vistas.dialogos.DialogMediosPago;
 import farmared.vistas.util.UiUtil;
 
@@ -19,8 +19,8 @@ import java.util.Map;
 
 public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
-    private final OrdenPagoVistaController controlador =
-            new OrdenPagoVistaController(AppContext.getInstancia().getSistema());
+    private final OrdenPagoController controlador =
+            AppContext.getInstancia().getOrdenPagoCtrl();
 
     private final JComboBox<String> comboProveedores = new JComboBox<>();
     private final JTable tablaImpagos = new JTable();
@@ -84,7 +84,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
     public void cargarDatos() {
         comboProveedores.removeAllItems();
-        for (var p : AppContext.getInstancia().getSistema().getProveedores()) {
+        for (var p : controlador.getProveedores()) {
             if (p.isActivo()) {
                 comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
             }
@@ -92,7 +92,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
         DefaultTableModel model = (DefaultTableModel) tablaOP.getModel();
         model.setRowCount(0);
-        for (OrdenPago op : controlador.listarEmitidas()) {
+        for (OrdenPago op : controlador.getOrdenesEmitidas()) {
             model.addRow(new Object[]{
                     op.getNumero(),
                     op.getProveedor().getRazonSocial(),
@@ -114,7 +114,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
         try {
             opEnCurso = null;
             seleccion.clear();
-            List<Comprobante> impagos = controlador.listarImpagos(obtenerCuitSeleccionado());
+            List<Comprobante> impagos = controlador.iniciarOrdenPago(obtenerCuitSeleccionado());
             DefaultTableModel model = (DefaultTableModel) tablaImpagos.getModel();
             model.setRowCount(0);
             for (Comprobante c : impagos) {
@@ -137,7 +137,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
         try {
             seleccion.clear();
             DefaultTableModel model = (DefaultTableModel) tablaImpagos.getModel();
-            List<Comprobante> impagos = controlador.listarImpagos(obtenerCuitSeleccionado());
+            List<Comprobante> impagos = controlador.iniciarOrdenPago(obtenerCuitSeleccionado());
 
             for (int i = 0; i < model.getRowCount(); i++) {
                 Boolean marcado = (Boolean) model.getValueAt(i, 0);
@@ -151,7 +151,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
                 throw new IllegalArgumentException("Seleccione al menos un comprobante.");
             }
 
-            opEnCurso = controlador.preparar(obtenerCuitSeleccionado(), seleccion);
+            opEnCurso = controlador.seleccionarComprobantes(obtenerCuitSeleccionado(), seleccion, new Date());
             lblResumen.setText(String.format(
                     "OP %s | %d comprobante(s) | Bruto: %s | Retenciones: %s | Neto: %s",
                     opEnCurso.getNumero(), seleccion.size(),
@@ -178,7 +178,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
         try {
             List<MedioPago> medios = dialog.getMedios();
-            controlador.confirmar(opEnCurso, medios);
+            controlador.confirmarPago(opEnCurso, medios);
             UiUtil.mostrarInfo(this, String.format(
                     "OP emitida: %s con %d medio(s) de pago",
                     opEnCurso.getNumero(), medios.size()

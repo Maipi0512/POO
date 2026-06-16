@@ -1,24 +1,14 @@
-<<<<<<<< HEAD:src/main/java/farmared/vistas/paneles/PanelOrdenesCompra.java
-﻿package farmared.vistas.paneles;
+package farmared.vistas.paneles;
 
 import farmared.modelo.modulos.m2_productos.Producto;
 import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
+import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modelo.modulos.m8_usuarios.Usuario;
-import farmared.modelo.SistemaGestionCompras;
 import farmared.controladores.AppContext;
+import farmared.controladores.OrdenCompraController;
 import farmared.vistas.util.CarritoUtil;
 import farmared.vistas.util.UiUtil;
-========
-package farmared.GUI.paneles;
 
-import farmared.controladores.OrdenCompraController;
-import farmared.modulos.m3_productos.Producto;
-import farmared.modulos.m4_ordenes_compra.DetalleOC;
-import farmared.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.modulos.m1_usuarios.Usuario;
-import farmared.GUI.AppContext;
-import farmared.GUI.util.UiUtil;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/paneles/PanelOrdenesCompra.java
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

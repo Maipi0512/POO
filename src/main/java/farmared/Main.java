@@ -1,13 +1,9 @@
-<<<<<<<< HEAD:src/main/java/farmared/Main.java
-﻿package farmared;
+package farmared;
 
 import farmared.controladores.AppContext;
 import farmared.vistas.DatosIniciales;
 import farmared.vistas.LoginDialog;
 import farmared.vistas.VistaPrincipal;
-========
-package farmared.GUI;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/FarmaredApp.java
 
 import javax.swing.*;
 
