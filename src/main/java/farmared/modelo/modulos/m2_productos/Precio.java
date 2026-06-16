@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m2_productos;
+package farmared.modelo.modulos.m2_productos;
 
 import java.util.Objects;
 

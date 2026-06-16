@@ -1,6 +1,6 @@
 package farmared.controladores;
 
-import farmared.modulos.m1_usuarios.Usuario;
+import farmared.modelo.modulos.m8_usuarios.Usuario;
 
 import java.util.ArrayList;
 import java.util.List;

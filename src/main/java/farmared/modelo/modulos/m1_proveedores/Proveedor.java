@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m1_proveedores;
+package farmared.modelo.modulos.m1_proveedores;
 
 import farmared.modelo.enums.CondicionIVA;
 import farmared.modelo.enums.TipoImpuesto;

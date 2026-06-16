@@ -1,4 +1,4 @@
-﻿package farmared.modelo.enums;
+package farmared.modelo.enums;
 
 /**
  * Estado de pago de un Comprobante en la cuenta corriente del proveedor.

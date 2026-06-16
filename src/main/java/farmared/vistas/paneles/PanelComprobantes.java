@@ -1,11 +1,10 @@
-﻿package farmared.vistas.paneles;
+package farmared.vistas.paneles;
 
 import farmared.modelo.enums.TipoComprobante;
 import farmared.modelo.modulos.m2_productos.Producto;
 import farmared.modelo.modulos.m5_comprobantes.Comprobante;
 import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
 import farmared.modelo.modulos.m8_usuarios.Usuario;
-import farmared.modelo.SistemaGestionCompras;
 import farmared.vistas.observador.NotificadorSistema;
 import farmared.vistas.observador.ObservadorSistema;
 import farmared.controladores.AppContext;
@@ -21,8 +20,7 @@ import java.util.List;
 
 public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
-    private final SistemaGestionCompras sistema = AppContext.getInstancia().getSistema();
-    private final ComprobanteController controlador = new ComprobanteController(sistema);
+    private final ComprobanteController controlador = new ComprobanteController();
 
     private final JComboBox<String> comboProveedores = new JComboBox<>();
     private final JComboBox<TipoComprobante> tipoComprobante = new JComboBox<>(TipoComprobante.values());
@@ -119,7 +117,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
     public void cargarDatos() {
         comboProveedores.removeAllItems();
-        for (var p : sistema.getProveedores()) {
+        for (var p : AppContext.getInstancia().getProveedorCtrl().listarProveedores()) {
             comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
         }
         cargarProductosProveedor();
@@ -144,7 +142,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         comboProductos.removeAllItems();
         try {
             String cuit = obtenerCuitSeleccionado();
-            for (Producto p : sistema.listarProductosPorProveedor(cuit)) {
+            for (Producto p : AppContext.getInstancia().getProductoCtrl().listarProductosPorProveedor(cuit)) {
                 comboProductos.addItem(p);
             }
             autocompletarPrecio();
@@ -156,7 +154,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         Producto prod = (Producto) comboProductos.getSelectedItem();
         if (prod == null) return;
         try {
-            double precio = sistema.obtenerPrecioVigente(prod.getCodigoInterno(), obtenerCuitSeleccionado());
+            double precio = AppContext.getInstancia().getProductoCtrl().obtenerPrecioVigente(prod.getCodigoInterno(), obtenerCuitSeleccionado());
             if (precio > 0) precioUnitario.setText(String.valueOf(precio));
         } catch (Exception ignored) {
         }
@@ -178,7 +176,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
             double precio;
             if (precioUnitario.getText().trim().isEmpty()) {
-                precio = sistema.obtenerPrecioVigente(producto.getCodigoInterno(), obtenerCuitSeleccionado());
+                precio = AppContext.getInstancia().getProductoCtrl().obtenerPrecioVigente(producto.getCodigoInterno(), obtenerCuitSeleccionado());
                 if (precio <= 0) throw new IllegalArgumentException("Sin precio vigente para este proveedor.");
             } else {
                 precio = UiUtil.parsearDouble(precioUnitario.getText(), "Precio");

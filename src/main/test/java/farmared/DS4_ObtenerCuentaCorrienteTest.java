@@ -1,18 +1,18 @@
 package farmared;
 
 import farmared.controladores.ReportesController;
-import farmared.enums.CondicionIVA;
-import farmared.enums.TipoComprobante;
-import farmared.enums.TipoIVA;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m2_proveedores.Rubro;
-import farmared.modulos.m3_productos.PrecioAcordado;
-import farmared.modulos.m3_productos.Producto;
-import farmared.modulos.m5_comprobantes.Comprobante;
-import farmared.modulos.m5_comprobantes.DetalleComprobante;
-import farmared.modulos.m5_comprobantes.Factura;
-import farmared.modulos.m5_comprobantes.NotaCredito;
-import farmared.modulos.m6_ordenes_pago.OrdenPago;
+import farmared.modelo.enums.CondicionIVA;
+import farmared.modelo.enums.TipoComprobante;
+import farmared.modelo.enums.TipoIVA;
+import farmared.modelo.modulos.m1_proveedores.Proveedor;
+import farmared.modelo.modulos.m1_proveedores.Rubro;
+import farmared.modelo.modulos.m2_productos.PrecioAcordado;
+import farmared.modelo.modulos.m2_productos.Producto;
+import farmared.modelo.modulos.m5_comprobantes.Comprobante;
+import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
+import farmared.modelo.modulos.m5_comprobantes.Factura;
+import farmared.modelo.modulos.m5_comprobantes.NotaCredito;
+import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
 
 import org.junit.Before;
 import org.junit.Test;

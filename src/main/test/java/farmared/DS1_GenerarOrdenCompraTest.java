@@ -1,16 +1,16 @@
 package farmared;
 
 import farmared.controladores.OrdenCompraController;
-import farmared.enums.CondicionIVA;
-import farmared.enums.EstadoOrdenCompra;
-import farmared.enums.RolUsuario;
-import farmared.enums.TipoIVA;
-import farmared.modulos.m1_usuarios.Usuario;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m2_proveedores.Rubro;
-import farmared.modulos.m3_productos.PrecioAcordado;
-import farmared.modulos.m3_productos.Producto;
-import farmared.modulos.m4_ordenes_compra.OrdenCompra;
+import farmared.modelo.enums.CondicionIVA;
+import farmared.modelo.enums.EstadoOrdenCompra;
+import farmared.modelo.enums.RolUsuario;
+import farmared.modelo.enums.TipoIVA;
+import farmared.modelo.modulos.m8_usuarios.Usuario;
+import farmared.modelo.modulos.m1_proveedores.Proveedor;
+import farmared.modelo.modulos.m1_proveedores.Rubro;
+import farmared.modelo.modulos.m2_productos.PrecioAcordado;
+import farmared.modelo.modulos.m2_productos.Producto;
+import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
 
 import org.junit.Before;
 import org.junit.Test;

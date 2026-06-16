@@ -1,8 +1,8 @@
 package farmared.controladores;
 
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m3_productos.PrecioAcordado;
-import farmared.modulos.m3_productos.Producto;
+import farmared.modelo.modulos.m1_proveedores.Proveedor;
+import farmared.modelo.modulos.m2_productos.PrecioAcordado;
+import farmared.modelo.modulos.m2_productos.Producto;
 
 import java.util.ArrayList;
 import java.util.Collections;

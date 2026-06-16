@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m3_impuestos;
+package farmared.modelo.modulos.m3_impuestos;
 
 import java.util.Objects;
 

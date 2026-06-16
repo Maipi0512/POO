@@ -1,35 +1,21 @@
-<<<<<<< HEAD
-﻿package farmared.controladores;
+package farmared.controladores;
 
+import farmared.modelo.enums.EstadoComprobante;
 import farmared.modelo.enums.TipoImpuesto;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
 import farmared.modelo.modulos.m2_productos.PrecioAcordado;
+import farmared.modelo.modulos.m2_productos.Producto;
 import farmared.modelo.modulos.m5_comprobantes.Comprobante;
+import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
 import farmared.modelo.modulos.m5_comprobantes.Factura;
 import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
-import farmared.modelo.SistemaGestionCompras;
-
-import java.util.Date;
-=======
-package farmared.controladores;
-
-import farmared.enums.EstadoComprobante;
-import farmared.enums.TipoImpuesto;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m3_productos.PrecioAcordado;
-import farmared.modulos.m3_productos.Producto;
-import farmared.modulos.m5_comprobantes.Comprobante;
-import farmared.modulos.m5_comprobantes.DetalleComprobante;
-import farmared.modulos.m5_comprobantes.Factura;
-import farmared.modulos.m6_ordenes_pago.OrdenPago;
-import farmared.modulos.m6_ordenes_pago.Retencion;
+import farmared.modelo.modulos.m3_impuestos.Retencion;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
 import java.util.List;
 import java.util.Map;
 
@@ -40,16 +26,6 @@ import java.util.Map;
 public class ReportesController {
 
     private static ReportesController instancia;
-<<<<<<< HEAD
-    private final SistemaGestionCompras sistema;
-
-    private ReportesController(SistemaGestionCompras sistema) {
-        this.sistema = sistema;
-    }
-
-    public static void inicializar(SistemaGestionCompras sistema) {
-        instancia = new ReportesController(sistema);
-=======
 
     private final List<Proveedor>   proveedores;
     private final List<Comprobante> comprobantes;
@@ -67,7 +43,6 @@ public class ReportesController {
     public static void inicializar(List<Proveedor> proveedores, List<Comprobante> comprobantes,
                                     List<OrdenPago> ordenesPago, List<Producto> productos) {
         instancia = new ReportesController(proveedores, comprobantes, ordenesPago, productos);
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     public static ReportesController getInstance() {
@@ -76,26 +51,11 @@ public class ReportesController {
     }
 
     // =========================================================================
-<<<<<<< HEAD
-    // DS4 - Cuenta corriente detallada
-=======
     // DS4 — cuenta corriente detallada
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     // =========================================================================
 
     /**
      * DS4: busca proveedor, obtiene sus comprobantes e historial de pagos.
-<<<<<<< HEAD
-     * Retorna la lista de comprobantes para que la UI itere (esSumaDeuda, getDetalles).
-     */
-    public List<Comprobante> consultarCuentaCorriente(String idProveedor) {
-        return sistema.consultarCuentaCorriente(idProveedor);
-    }
-
-    /** DS4: busca órdenes de pago del proveedor para mostrar historial. */
-    public List<OrdenPago> buscarPagosPorProveedor(String cuitProveedor) {
-        return sistema.consultarPagosPorProveedor(cuitProveedor);
-=======
      */
     public List<Comprobante> consultarCuentaCorriente(String cuitProveedor) {
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
@@ -110,46 +70,12 @@ public class ReportesController {
         for (OrdenPago op : ordenesPago)
             if (op.getProveedor().getCuit().equals(cuit)) resultado.add(op);
         return resultado;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     // =========================================================================
     // Reportes adicionales (RF-22 a RF-27)
     // =========================================================================
 
-<<<<<<< HEAD
-    public List<Comprobante> listarDocumentosImpagos(String cuitProveedor) {
-        return sistema.listarDocumentosImpagos(cuitProveedor);
-    }
-
-    public Map<String, Double> consultarDeudaVigentePorProveedor() {
-        return sistema.consultarDeudaVigentePorProveedor();
-    }
-
-    public Map<TipoImpuesto, Double> reporteRetencionesPorTipo() {
-        return sistema.reporteRetencionesPorTipo();
-    }
-
-    public List<Map<String, Object>> generarLibroIVACompras() {
-        return sistema.generarLibroIVACompras();
-    }
-
-    public List<Factura> consultarFacturasPorDia(Date fecha, String cuitProveedor) {
-        return sistema.consultarFacturasPorDia(fecha, cuitProveedor);
-    }
-
-    public List<PrecioAcordado> consultarCompulsaPrecios(String codigoProducto) {
-        return sistema.consultarCompulsaPrecios(codigoProducto);
-    }
-
-    public List<Proveedor> getProveedores() {
-        return sistema.getProveedores();
-    }
-
-    public Proveedor buscarProveedorPorId(String cuit) {
-        return sistema.buscarProveedorPorId(cuit);
-    }
-=======
     /** RF-22: Documentos impagos de un proveedor. */
     public List<Comprobante> listarDocumentosImpagos(String cuitProveedor) {
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
@@ -246,5 +172,4 @@ public class ReportesController {
     }
 
     private double round2(double v) { return Math.round(v * 100.0) / 100.0; }
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
 }

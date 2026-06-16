@@ -1,4 +1,4 @@
-﻿package farmared.vistas.paneles;
+package farmared.vistas.paneles;
 
 import farmared.modelo.modulos.m5_comprobantes.Comprobante;
 import farmared.modelo.modulos.m6_ordenes_pago.MedioPago;
@@ -19,8 +19,7 @@ import java.util.Map;
 
 public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
-    private final OrdenPagoVistaController controlador =
-            new OrdenPagoVistaController(AppContext.getInstancia().getSistema());
+    private final OrdenPagoVistaController controlador = new OrdenPagoVistaController();
 
     private final JComboBox<String> comboProveedores = new JComboBox<>();
     private final JTable tablaImpagos = new JTable();
@@ -84,7 +83,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
     public void cargarDatos() {
         comboProveedores.removeAllItems();
-        for (var p : AppContext.getInstancia().getSistema().getProveedores()) {
+        for (var p : AppContext.getInstancia().getOrdenPagoCtrl().getProveedores()) {
             if (p.isActivo()) {
                 comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
             }

@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m5_comprobantes;
+package farmared.modelo.modulos.m5_comprobantes;
 
 import farmared.modelo.modulos.m2_productos.Producto;
 

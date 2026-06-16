@@ -1,12 +1,12 @@
 package farmared.GUI.paneles;
 
 import farmared.controladores.FacturaController;
-import farmared.enums.TipoComprobante;
-import farmared.modulos.m4_ordenes_compra.DetalleOC;
-import farmared.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.modulos.m5_comprobantes.Comprobante;
-import farmared.modulos.m5_comprobantes.DetalleComprobante;
-import farmared.modulos.m1_usuarios.Usuario;
+import farmared.modelo.enums.TipoComprobante;
+import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
+import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
+import farmared.modelo.modulos.m5_comprobantes.Comprobante;
+import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
+import farmared.modelo.modulos.m8_usuarios.Usuario;
 import farmared.GUI.AppContext;
 import farmared.GUI.util.CarritoUtil;
 import farmared.GUI.util.UiUtil;

@@ -1,14 +1,6 @@
-<<<<<<<< HEAD:src/main/java/farmared/vistas/VistaPrincipal.java
-﻿package farmared.vistas;
-
-import farmared.Main;
-import farmared.controladores.AppContext;
-import farmared.vistas.paneles.*;
-========
 package farmared.GUI;
 
 import farmared.GUI.paneles.*;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/VistaPrincipal.java
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,7 +42,7 @@ public class VistaPrincipal extends JFrame {
         cerrarSesion.addActionListener(e -> {
             AppContext.getInstancia().cerrarSesion();
             dispose();
-            Main.iniciarAplicacion();
+            FarmaredApp.iniciarAplicacion();
         });
 
         JPanel barra = new JPanel(new BorderLayout());

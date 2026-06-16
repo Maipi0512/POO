@@ -1,27 +1,14 @@
-<<<<<<<< HEAD:src/main/java/farmared/vistas/paneles/PanelProductos.java
-﻿package farmared.vistas.paneles;
+package farmared.GUI.paneles;
 
+import farmared.controladores.ProductoController;
+import farmared.controladores.ProveedorController;
 import farmared.modelo.enums.TipoIVA;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
 import farmared.modelo.modulos.m1_proveedores.Rubro;
 import farmared.modelo.modulos.m2_productos.PrecioAcordado;
 import farmared.modelo.modulos.m2_productos.Producto;
-import farmared.modelo.SistemaGestionCompras;
-import farmared.controladores.AppContext;
-import farmared.vistas.util.UiUtil;
-========
-package farmared.GUI.paneles;
-
-import farmared.controladores.ProductoController;
-import farmared.controladores.ProveedorController;
-import farmared.enums.TipoIVA;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m2_proveedores.Rubro;
-import farmared.modulos.m3_productos.PrecioAcordado;
-import farmared.modulos.m3_productos.Producto;
 import farmared.GUI.AppContext;
 import farmared.GUI.util.UiUtil;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/paneles/PanelProductos.java
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

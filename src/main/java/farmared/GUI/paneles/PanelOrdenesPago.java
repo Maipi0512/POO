@@ -1,10 +1,10 @@
 package farmared.GUI.paneles;
 
 import farmared.controladores.OrdenPagoController;
-import farmared.modulos.m5_comprobantes.Comprobante;
-import farmared.modulos.m6_ordenes_pago.CancelacionComprobante;
-import farmared.modulos.m6_ordenes_pago.MedioPago;
-import farmared.modulos.m6_ordenes_pago.OrdenPago;
+import farmared.modelo.modulos.m5_comprobantes.Comprobante;
+import farmared.modelo.modulos.m6_ordenes_pago.CancelacionComprobante;
+import farmared.modelo.modulos.m6_ordenes_pago.MedioPago;
+import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
 import farmared.GUI.AppContext;
 import farmared.GUI.dialogos.DialogMediosPago;
 import farmared.GUI.util.UiUtil;

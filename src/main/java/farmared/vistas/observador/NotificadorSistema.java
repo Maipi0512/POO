@@ -1,4 +1,4 @@
-﻿package farmared.vistas.observador;
+package farmared.vistas.observador;
 
 import java.util.ArrayList;
 import java.util.List;

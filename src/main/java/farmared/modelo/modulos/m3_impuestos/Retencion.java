@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m3_impuestos;
+package farmared.modelo.modulos.m3_impuestos;
 
 /**
  * Retencion impositiva efectuada en una Orden de Pago (RF-20).

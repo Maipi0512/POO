@@ -1,20 +1,9 @@
-<<<<<<<< HEAD:src/main/java/farmared/vistas/paneles/PanelRubros.java
-﻿package farmared.vistas.paneles;
-
-import farmared.modelo.modulos.m1_proveedores.Rubro;
-import farmared.vistas.observador.NotificadorSistema;
-import farmared.vistas.observador.ObservadorSistema;
-import farmared.controladores.AppContext;
-import farmared.controladores.ProveedorController;
-import farmared.vistas.util.UiUtil;
-========
 package farmared.GUI.paneles;
 
-import farmared.modulos.m2_proveedores.Rubro;
+import farmared.modelo.modulos.m1_proveedores.Rubro;
 import farmared.GUI.AppContext;
 import farmared.controladores.ProveedorController;
 import farmared.GUI.util.UiUtil;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/paneles/PanelRubros.java
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

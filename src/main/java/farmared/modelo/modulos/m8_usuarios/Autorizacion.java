@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m8_usuarios;
+package farmared.modelo.modulos.m8_usuarios;
 
 import java.util.Date;
 

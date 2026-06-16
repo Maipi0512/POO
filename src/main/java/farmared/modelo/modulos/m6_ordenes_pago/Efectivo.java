@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m6_ordenes_pago;
+package farmared.modelo.modulos.m6_ordenes_pago;
 
 import java.util.Date;
 

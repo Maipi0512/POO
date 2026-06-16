@@ -1,56 +1,30 @@
-<<<<<<< HEAD
-﻿package farmared.controladores;
+package farmared.controladores;
 
+import farmared.modelo.enums.EstadoComprobante;
+import farmared.modelo.enums.EstadoOrdenCompra;
 import farmared.modelo.enums.TipoComprobante;
+import farmared.modelo.modulos.m8_usuarios.Autorizacion;
 import farmared.modelo.modulos.m8_usuarios.Usuario;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
 import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
-import farmared.modelo.modulos.m5_comprobantes.*;
-import farmared.modelo.SistemaGestionCompras;
-
-=======
-package farmared.controladores;
-
-import farmared.enums.EstadoComprobante;
-import farmared.enums.EstadoOrdenCompra;
-import farmared.enums.TipoComprobante;
-import farmared.modulos.m1_usuarios.Autorizacion;
-import farmared.modulos.m1_usuarios.Usuario;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m4_ordenes_compra.DetalleOC;
-import farmared.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.modulos.m5_comprobantes.Comprobante;
-import farmared.modulos.m5_comprobantes.DetalleComprobante;
-import farmared.modulos.m5_comprobantes.Factura;
-import farmared.modulos.m5_comprobantes.NotaCredito;
-import farmared.modulos.m5_comprobantes.NotaDebito;
+import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
+import farmared.modelo.modulos.m5_comprobantes.Comprobante;
+import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
+import farmared.modelo.modulos.m5_comprobantes.Factura;
+import farmared.modelo.modulos.m5_comprobantes.NotaCredito;
+import farmared.modelo.modulos.m5_comprobantes.NotaDebito;
 
 import java.util.ArrayList;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
 import java.util.Date;
 import java.util.List;
 
 /**
-<<<<<<< HEAD
- * DS3 — Registrar Factura / Nota de Crédito / Nota de Débito.
-=======
  * DS3 — Registrar Comprobante (Factura / Nota Credito / Nota Debito).
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
  * Controlador singleton del modulo 5 (RF-14 a RF-17).
  */
 public class FacturaController {
 
     private static FacturaController instancia;
-<<<<<<< HEAD
-    private final SistemaGestionCompras sistema;
-
-    private FacturaController(SistemaGestionCompras sistema) {
-        this.sistema = sistema;
-    }
-
-    public static void inicializar(SistemaGestionCompras sistema) {
-        instancia = new FacturaController(sistema);
-=======
 
     private final List<Proveedor>   proveedores;
     private final List<OrdenCompra> ordenesCompra;
@@ -70,7 +44,6 @@ public class FacturaController {
     public static void inicializar(List<Proveedor> proveedores, List<OrdenCompra> ordenesCompra,
                                     List<Comprobante> comprobantes, List<Usuario> usuarios) {
         instancia = new FacturaController(proveedores, ordenesCompra, comprobantes, usuarios);
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     public static FacturaController getInstance() {
@@ -79,22 +52,6 @@ public class FacturaController {
     }
 
     // =========================================================================
-<<<<<<< HEAD
-    // DS3 - flujo completo
-    // =========================================================================
-
-    /**
-     * DS3: registra factura, valida contra OC y afecta cuenta corriente del proveedor.
-     * Si hay desvío o no tiene OC, requiere supervisor.
-     */
-    public Factura registrarFactura(String numero, TipoComprobante tipo,
-                                    Date fechaEmision, Date fechaRecepcion,
-                                    List<DetalleComprobante> detalles,
-                                    String cuitProveedor, List<String> nrosOC,
-                                    Usuario supervisor, String motivo) {
-        return sistema.registrarFactura(numero, tipo, fechaEmision, fechaRecepcion,
-                detalles, cuitProveedor, nrosOC, supervisor, motivo);
-=======
     // DS3 — registro de comprobantes
     // =========================================================================
 
@@ -157,14 +114,10 @@ public class FacturaController {
         comprobantes.add(factura);
         actualizarEstadoOrdenesCompra(factura);
         return factura;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     public NotaCredito registrarNotaCredito(String numero, Date fechaEmision, Date fechaRecepcion,
                                              List<DetalleComprobante> detalles, String cuitProveedor) {
-<<<<<<< HEAD
-        return sistema.registrarNotaCredito(numero, fechaEmision, fechaRecepcion, detalles, cuitProveedor);
-=======
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
         if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado.");
         String nro = numero != null ? numero : "NC-" + String.format("%08d", contadorComprobante++);
@@ -173,50 +126,10 @@ public class FacturaController {
         prov.agregarComprobante(nc);
         comprobantes.add(nc);
         return nc;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     public NotaDebito registrarNotaDebito(String numero, Date fechaEmision, Date fechaRecepcion,
                                            List<DetalleComprobante> detalles, String cuitProveedor) {
-<<<<<<< HEAD
-        return sistema.registrarNotaDebito(numero, fechaEmision, fechaRecepcion, detalles, cuitProveedor);
-    }
-
-    // =========================================================================
-    // Validaciones DS3 (expuestas para que la UI pueda pre-validar)
-    // =========================================================================
-
-    public boolean validarProductos(List<DetalleComprobante> factura, List<DetalleOC> oc) {
-        return sistema.validarProductos(factura, oc);
-    }
-
-    public boolean validarPrecios(List<DetalleComprobante> factura, List<DetalleOC> oc) {
-        return sistema.validarPrecios(factura, oc);
-    }
-
-    public boolean validarImpuestos(List<DetalleComprobante> factura) {
-        return sistema.validarImpuestos(factura);
-    }
-
-    // =========================================================================
-    // Consultas
-    // =========================================================================
-
-    public List<Comprobante> getComprobantes() {
-        return sistema.getComprobantes();
-    }
-
-    public Proveedor buscarProveedorPorId(String cuit) {
-        return sistema.buscarProveedorPorId(cuit);
-    }
-
-    public List<Proveedor> getProveedores() {
-        return sistema.getProveedores();
-    }
-
-    public List<Usuario> listarSupervisores() {
-        return sistema.listarSupervisores();
-=======
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
         if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado.");
         String nro = numero != null ? numero : "ND-" + String.format("%08d", contadorComprobante++);
@@ -336,6 +249,5 @@ public class FacturaController {
                     && c.getEstado() != EstadoComprobante.ANULADO)
                 resultado.add(c);
         return resultado;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 }

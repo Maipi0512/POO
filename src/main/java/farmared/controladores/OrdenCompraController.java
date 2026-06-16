@@ -1,25 +1,14 @@
-<<<<<<< HEAD
-﻿package farmared.controladores;
-
-import farmared.modelo.modulos.m8_usuarios.Usuario;
-import farmared.modelo.modulos.m1_proveedores.Proveedor;
-import farmared.modelo.modulos.m2_productos.Producto;
-import farmared.modelo.modulos.m4_ordenes_compra.*;
-import farmared.modelo.SistemaGestionCompras;
-
-=======
 package farmared.controladores;
 
-import farmared.modulos.m1_usuarios.Autorizacion;
-import farmared.modulos.m1_usuarios.Usuario;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m3_productos.PrecioAcordado;
-import farmared.modulos.m3_productos.Producto;
-import farmared.modulos.m4_ordenes_compra.DetalleOC;
-import farmared.modulos.m4_ordenes_compra.OrdenCompra;
+import farmared.modelo.modulos.m8_usuarios.Autorizacion;
+import farmared.modelo.modulos.m8_usuarios.Usuario;
+import farmared.modelo.modulos.m1_proveedores.Proveedor;
+import farmared.modelo.modulos.m2_productos.PrecioAcordado;
+import farmared.modelo.modulos.m2_productos.Producto;
+import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
+import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
 
 import java.util.ArrayList;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
 import java.util.List;
 
 /**
@@ -29,16 +18,6 @@ import java.util.List;
 public class OrdenCompraController {
 
     private static OrdenCompraController instancia;
-<<<<<<< HEAD
-    private final SistemaGestionCompras sistema;
-
-    private OrdenCompraController(SistemaGestionCompras sistema) {
-        this.sistema = sistema;
-    }
-
-    public static void inicializar(SistemaGestionCompras sistema) {
-        instancia = new OrdenCompraController(sistema);
-=======
 
     private final List<Proveedor>   proveedores;
     private final List<Producto>    productos;
@@ -58,7 +37,6 @@ public class OrdenCompraController {
     public static void inicializar(List<Proveedor> proveedores, List<Producto> productos,
                                     List<OrdenCompra> ordenesCompra, List<Usuario> usuarios) {
         instancia = new OrdenCompraController(proveedores, productos, ordenesCompra, usuarios);
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     public static OrdenCompraController getInstance() {
@@ -67,14 +45,6 @@ public class OrdenCompraController {
     }
 
     // =========================================================================
-<<<<<<< HEAD
-    // DS1 - flujo completo
-    // =========================================================================
-
-    /** DS1 paso 1: crea OC vacía para el proveedor. */
-    public OrdenCompra crearOrdenCompra(String idProveedor) {
-        return sistema.crearOrdenCompra(idProveedor);
-=======
     // DS1 — flujo completo
     // =========================================================================
 
@@ -83,14 +53,10 @@ public class OrdenCompraController {
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
         if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado: " + cuitProveedor);
         return new OrdenCompra("OC-" + String.format("%08d", contadorOC++), prov);
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     /** DS1 loop: agrega un ítem buscando precio vigente del producto. */
     public void agregarItem(OrdenCompra oc, String codigoProducto, double cantidad, int nroLinea) {
-<<<<<<< HEAD
-        sistema.agregarItemOC(oc, codigoProducto, cantidad, nroLinea);
-=======
         Producto producto = buscarProductoPorCodigo(codigoProducto);
         if (producto == null) throw new IllegalArgumentException("Producto no encontrado: " + codigoProducto);
         PrecioAcordado precio = producto.obtenerUltimoPrecio(oc.getProveedor());
@@ -104,42 +70,10 @@ public class OrdenCompraController {
         Producto producto = buscarProductoPorCodigo(codigoProducto);
         if (producto == null) throw new IllegalArgumentException("Producto no encontrado: " + codigoProducto);
         oc.agregarDetalle(new DetalleOC(nroLinea, producto, cantidad, precio));
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 
     /** DS1 cierre: valida tope de deuda y emite (con o sin supervisor). */
     public OrdenCompra emitirOrdenCompra(OrdenCompra oc, Usuario supervisor, String motivo) {
-<<<<<<< HEAD
-        return sistema.emitirOrdenCompra(oc, supervisor, motivo);
-    }
-
-    // =========================================================================
-    // Consultas de apoyo (buscar en colección — DS1 loops)
-    // =========================================================================
-
-    public Proveedor buscarProveedorPorId(String cuit) {
-        return sistema.buscarProveedorPorId(cuit);
-    }
-
-    public List<Proveedor> getProveedores() {
-        return sistema.getProveedores();
-    }
-
-    public List<Producto> listarProductosPorProveedor(String cuitProveedor) {
-        return sistema.listarProductosPorProveedor(cuitProveedor);
-    }
-
-    public double obtenerPrecioVigente(String codigoProducto, String cuitProveedor) {
-        return sistema.obtenerPrecioVigente(codigoProducto, cuitProveedor);
-    }
-
-    public List<OrdenCompra> getOrdenesCompra() {
-        return sistema.reporteOrdenesCompra();
-    }
-
-    public List<Usuario> listarSupervisores() {
-        return sistema.listarSupervisores();
-=======
         oc.calcularTotal();
         if (oc.getProveedor().validarNuevaOC(oc.getImporteTotal())) {
             oc.emitir();
@@ -186,7 +120,7 @@ public class OrdenCompraController {
     public List<Producto> listarProductosPorProveedor(String cuitProveedor) {
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
         if (prov == null) return new ArrayList<>();
-        List<farmared.modulos.m2_proveedores.Rubro> rubros = prov.getRubros();
+        List<farmared.modelo.modulos.m1_proveedores.Rubro> rubros = prov.getRubros();
         List<Producto> resultado = new ArrayList<>();
         for (Producto p : productos) {
             if (!p.isActivo()) continue;
@@ -210,6 +144,5 @@ public class OrdenCompraController {
         List<Usuario> sup = new ArrayList<>();
         for (Usuario u : usuarios) if (u.esAutorizador()) sup.add(u);
         return sup;
->>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870
     }
 }

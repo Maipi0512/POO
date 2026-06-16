@@ -1,28 +1,13 @@
-<<<<<<<< HEAD:src/main/java/farmared/vistas/paneles/PanelProveedores.java
-﻿package farmared.vistas.paneles;
+package farmared.GUI.paneles;
 
 import farmared.modelo.enums.CondicionIVA;
 import farmared.modelo.enums.TipoImpuesto;
 import farmared.modelo.modulos.m1_proveedores.CertificadoNoRetencion;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
 import farmared.modelo.modulos.m1_proveedores.Rubro;
-import farmared.vistas.observador.NotificadorSistema;
-import farmared.vistas.observador.ObservadorSistema;
-import farmared.controladores.AppContext;
-import farmared.controladores.ProveedorController;
-import farmared.vistas.util.UiUtil;
-========
-package farmared.GUI.paneles;
-
-import farmared.enums.CondicionIVA;
-import farmared.enums.TipoImpuesto;
-import farmared.modulos.m2_proveedores.CertificadoNoRetencion;
-import farmared.modulos.m2_proveedores.Proveedor;
-import farmared.modulos.m2_proveedores.Rubro;
 import farmared.GUI.AppContext;
 import farmared.controladores.ProveedorController;
 import farmared.GUI.util.UiUtil;
->>>>>>>> 4f7806ab87b6a3fe759880a16e996f93a8bf6870:src/main/java/farmared/GUI/paneles/PanelProveedores.java
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
