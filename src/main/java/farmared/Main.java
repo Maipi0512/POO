@@ -22,7 +22,8 @@ public class Main {
         } catch (Exception ignored) {
         }
 
-        AppContext.getInstancia(); // inicializa controladores y datos
+        AppContext.getInstancia();
+        DatosIniciales.cargar();
 
         LoginDialog login = new LoginDialog(null);
         login.setVisible(true);

@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m3_impuestos;
+package farmared.modelo.modulos.m3_impuestos;
 
 import farmared.modelo.enums.TipoImpuesto;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;

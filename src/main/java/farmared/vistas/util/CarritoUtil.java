@@ -1,5 +1,8 @@
 package farmared.vistas.util;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
 
 import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;

@@ -7,7 +7,10 @@ import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
 import farmared.controladores.AppContext;
 import farmared.controladores.ReportesController;
 import farmared.vistas.util.UiUtil;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

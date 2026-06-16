@@ -1,4 +1,4 @@
-﻿package farmared.modelo.enums;
+package farmared.modelo.enums;
 
 /**
  * Rol que define los permisos del usuario dentro del sistema.

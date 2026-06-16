@@ -1,4 +1,4 @@
-﻿package farmared.modelo.enums;
+package farmared.modelo.enums;
 
 /**
  * Condicion tributaria del proveedor ante el fisco.

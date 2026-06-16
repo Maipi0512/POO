@@ -1,4 +1,4 @@
-﻿package farmared.modelo.enums;
+package farmared.modelo.enums;
 
 /**
  * Alicuota de IVA aplicable a un producto o servicio.

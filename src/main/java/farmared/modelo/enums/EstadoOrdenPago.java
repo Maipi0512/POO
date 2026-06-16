@@ -1,4 +1,4 @@
-﻿package farmared.modelo.enums;
+package farmared.modelo.enums;
 
 /**
  * Ciclo de vida de una Orden de Pago.

@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m4_ordenes_compra;
+package farmared.modelo.modulos.m4_ordenes_compra;
 
 import farmared.modelo.enums.EstadoOrdenCompra;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;

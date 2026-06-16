@@ -1,4 +1,4 @@
-﻿package farmared.modelo.modulos.m4_ordenes_compra;
+package farmared.modelo.modulos.m4_ordenes_compra;
 
 import farmared.modelo.modulos.m2_productos.Producto;
 

@@ -1,4 +1,4 @@
-﻿package farmared.modelo.enums;
+package farmared.modelo.enums;
 
 /**
  * Tipos de impuesto que el sistema puede retener al pagar a un proveedor.
