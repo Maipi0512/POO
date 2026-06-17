@@ -2,10 +2,8 @@ package farmared.vistas.dialogos;
 
 import farmared.modelo.modulos.m6_ordenes_pago.*;
 import farmared.vistas.util.UiUtil;
-<<<<<<< HEAD
 
-=======
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
+
 
 import javax.swing.*;
 import java.awt.*;

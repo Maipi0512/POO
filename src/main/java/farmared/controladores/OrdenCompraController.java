@@ -3,10 +3,8 @@ package farmared.controladores;
 import farmared.modelo.modulos.m8_usuarios.Autorizacion;
 import farmared.modelo.modulos.m8_usuarios.Usuario;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
-<<<<<<< HEAD
 import farmared.modelo.modulos.m1_proveedores.Rubro;
-=======
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
+
 import farmared.modelo.modulos.m2_productos.PrecioAcordado;
 import farmared.modelo.modulos.m2_productos.Producto;
 import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
@@ -124,11 +122,7 @@ public class OrdenCompraController {
     public List<Producto> listarProductosPorProveedor(String cuitProveedor) {
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
         if (prov == null) return new ArrayList<>();
-<<<<<<< HEAD
         List<Rubro> rubros = prov.getRubros();
-=======
-        List<farmared.modelo.modulos.m1_proveedores.Rubro> rubros = prov.getRubros();
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
         List<Producto> resultado = new ArrayList<>();
         for (Producto p : productos) {
             if (!p.isActivo()) continue;

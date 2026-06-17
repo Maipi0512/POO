@@ -3,10 +3,8 @@ package farmared.vistas;
 import farmared.Main;
 import farmared.controladores.AppContext;
 import farmared.vistas.paneles.*;
-<<<<<<< HEAD
 
-=======
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
+
 
 import javax.swing.*;
 import java.awt.*;

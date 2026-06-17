@@ -16,15 +16,12 @@ import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
 
 public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
-<<<<<<< HEAD
     private final OrdenPagoController controlador =
             AppContext.getInstancia().getOrdenPagoCtrl();
-=======
-    private final OrdenPagoVistaController controlador = new OrdenPagoVistaController();
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
 
     private final JComboBox<String> comboProveedores = new JComboBox<>();
     private final JTable tablaImpagos = new JTable();
@@ -88,11 +85,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
     public void cargarDatos() {
         comboProveedores.removeAllItems();
-<<<<<<< HEAD
         for (var p : controlador.getProveedores()) {
-=======
-        for (var p : AppContext.getInstancia().getOrdenPagoCtrl().getProveedores()) {
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
             if (p.isActivo()) {
                 comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
             }

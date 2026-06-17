@@ -48,10 +48,7 @@ public class OrdenPagoController {
     // DS2 paso 1: obtener comprobantes impagos
     // =========================================================================
 
-<<<<<<< HEAD
-=======
     /** DS2: busca proveedor y retorna su lista de comprobantes con saldo pendiente. */
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
     public List<Comprobante> iniciarOrdenPago(String cuitProveedor) {
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
         if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado.");
@@ -67,13 +64,10 @@ public class OrdenPagoController {
     // DS2 paso 2: crear OP, cancelaciones y retenciones
     // =========================================================================
 
-<<<<<<< HEAD
-=======
     /**
      * DS2: crea OrdenPago, agrega cancelaciones por cada comprobante seleccionado
      * y calcula retenciones según los impuestos parametrizados y certificados del proveedor.
      */
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
     public OrdenPago seleccionarComprobantes(String cuitProveedor,
                                               Map<Comprobante, Double> seleccion,
                                               Date fechaEmision) {

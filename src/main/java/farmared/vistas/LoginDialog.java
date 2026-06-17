@@ -3,10 +3,8 @@ package farmared.vistas;
 import farmared.controladores.AppContext;
 import farmared.modelo.modulos.m8_usuarios.Usuario;
 import farmared.vistas.util.UiUtil;
-<<<<<<< HEAD
 
-=======
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
+
 
 import javax.swing.*;
 import java.awt.*;

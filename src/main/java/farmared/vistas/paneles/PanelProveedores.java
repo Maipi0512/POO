@@ -10,10 +10,8 @@ import farmared.vistas.observador.ObservadorSistema;
 import farmared.controladores.AppContext;
 import farmared.controladores.ProveedorController;
 import farmared.vistas.util.UiUtil;
-<<<<<<< HEAD
 
-=======
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
+
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

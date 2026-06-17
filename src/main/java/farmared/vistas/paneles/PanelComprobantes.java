@@ -20,12 +20,8 @@ import java.util.List;
 
 public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
-<<<<<<< HEAD
     private final FacturaController controlador = AppContext.getInstancia().getFacturaCtrl();
 
-=======
-    private final ComprobanteController controlador = new ComprobanteController();
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
 
     private final JComboBox<String> comboProveedores = new JComboBox<>();
     private final JComboBox<TipoComprobante> tipoComprobante = new JComboBox<>(TipoComprobante.values());
@@ -122,11 +118,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
     public void cargarDatos() {
         comboProveedores.removeAllItems();
-<<<<<<< HEAD
         for (var p : controlador.getProveedores()) {
-=======
-        for (var p : AppContext.getInstancia().getProveedorCtrl().listarProveedores()) {
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
             comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
         }
         cargarProductosProveedor();
@@ -151,11 +143,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         comboProductos.removeAllItems();
         try {
             String cuit = obtenerCuitSeleccionado();
-<<<<<<< HEAD
             for (Producto p : AppContext.getInstancia().getOrdenCompraCtrl().listarProductosPorProveedor(cuit)) {
-=======
-            for (Producto p : AppContext.getInstancia().getProductoCtrl().listarProductosPorProveedor(cuit)) {
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
                 comboProductos.addItem(p);
             }
             autocompletarPrecio();
@@ -167,11 +155,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         Producto prod = (Producto) comboProductos.getSelectedItem();
         if (prod == null) return;
         try {
-<<<<<<< HEAD
             double precio = AppContext.getInstancia().getOrdenCompraCtrl().obtenerPrecioVigente(prod.getCodigoInterno(), obtenerCuitSeleccionado());
-=======
-            double precio = AppContext.getInstancia().getProductoCtrl().obtenerPrecioVigente(prod.getCodigoInterno(), obtenerCuitSeleccionado());
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
             if (precio > 0) precioUnitario.setText(String.valueOf(precio));
         } catch (Exception ignored) {
         }
@@ -193,11 +177,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
             double precio;
             if (precioUnitario.getText().trim().isEmpty()) {
-<<<<<<< HEAD
                 precio = AppContext.getInstancia().getOrdenCompraCtrl().obtenerPrecioVigente(producto.getCodigoInterno(), obtenerCuitSeleccionado());
-=======
-                precio = AppContext.getInstancia().getProductoCtrl().obtenerPrecioVigente(producto.getCodigoInterno(), obtenerCuitSeleccionado());
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
                 if (precio <= 0) throw new IllegalArgumentException("Sin precio vigente para este proveedor.");
             } else {
                 precio = UiUtil.parsearDouble(precioUnitario.getText(), "Precio");

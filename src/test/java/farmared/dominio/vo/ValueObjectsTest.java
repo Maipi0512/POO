@@ -1,4 +1,4 @@
-﻿package farmared.dominio.vo;
+package farmared.dominio.vo;
 
 import farmared.modelo.modulos.m1_proveedores.CUIT;
 import farmared.modelo.modulos.m2_productos.Precio;

@@ -6,15 +6,9 @@ import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modelo.modulos.m8_usuarios.Usuario;
 import farmared.controladores.AppContext;
 import farmared.controladores.OrdenCompraController;
-<<<<<<< HEAD
 import farmared.vistas.util.CarritoUtil;
 import farmared.vistas.util.UiUtil;
 
-=======
-import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
-import farmared.vistas.util.CarritoUtil;
-import farmared.vistas.util.UiUtil;
->>>>>>> 448923d989d2835e785bae01461f31fbc44ebc42
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
