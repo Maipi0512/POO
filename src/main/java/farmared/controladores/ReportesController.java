@@ -5,6 +5,7 @@ import farmared.modelo.enums.TipoImpuesto;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
 import farmared.modelo.modulos.m2_productos.PrecioAcordado;
 import farmared.modelo.modulos.m2_productos.Producto;
+import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
 import farmared.modelo.modulos.m5_comprobantes.Comprobante;
 import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
 import farmared.modelo.modulos.m5_comprobantes.Factura;
@@ -31,18 +32,22 @@ public class ReportesController {
     private final List<Comprobante> comprobantes;
     private final List<OrdenPago>   ordenesPago;
     private final List<Producto>    productos;
+    private final List<OrdenCompra> ordenesCompra;
 
     private ReportesController(List<Proveedor> proveedores, List<Comprobante> comprobantes,
-                                List<OrdenPago> ordenesPago, List<Producto> productos) {
-        this.proveedores  = proveedores;
-        this.comprobantes = comprobantes;
-        this.ordenesPago  = ordenesPago;
-        this.productos    = productos;
+                                List<OrdenPago> ordenesPago, List<Producto> productos,
+                                List<OrdenCompra> ordenesCompra) {
+        this.proveedores   = proveedores;
+        this.comprobantes  = comprobantes;
+        this.ordenesPago   = ordenesPago;
+        this.productos     = productos;
+        this.ordenesCompra = ordenesCompra;
     }
 
     public static void inicializar(List<Proveedor> proveedores, List<Comprobante> comprobantes,
-                                    List<OrdenPago> ordenesPago, List<Producto> productos) {
-        instancia = new ReportesController(proveedores, comprobantes, ordenesPago, productos);
+                                    List<OrdenPago> ordenesPago, List<Producto> productos,
+                                    List<OrdenCompra> ordenesCompra) {
+        instancia = new ReportesController(proveedores, comprobantes, ordenesPago, productos, ordenesCompra);
     }
 
     public static ReportesController getInstance() {
@@ -162,6 +167,28 @@ public class ReportesController {
     }
 
     public List<Proveedor> getProveedores() { return new ArrayList<>(proveedores); }
+
+    /** Reporte de todas las OC emitidas (opcionalmente filtradas por proveedor). */
+    public List<OrdenCompra> listarOrdenesCompra(String cuitProveedor) {
+        List<OrdenCompra> resultado = new ArrayList<>();
+        for (OrdenCompra oc : ordenesCompra) {
+            if (cuitProveedor == null || cuitProveedor.isBlank()
+                    || oc.getProveedor().getCuit().equals(cuitProveedor))
+                resultado.add(oc);
+        }
+        return resultado;
+    }
+
+    /** Reporte de todas las OP emitidas (opcionalmente filtradas por proveedor). */
+    public List<OrdenPago> listarOrdenesPago(String cuitProveedor) {
+        List<OrdenPago> resultado = new ArrayList<>();
+        for (OrdenPago op : ordenesPago) {
+            if (cuitProveedor == null || cuitProveedor.isBlank()
+                    || op.getProveedor().getCuit().equals(cuitProveedor))
+                resultado.add(op);
+        }
+        return resultado;
+    }
 
     private boolean mismaFecha(Date a, Date b) {
         if (a == null || b == null) return false;

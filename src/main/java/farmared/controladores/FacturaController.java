@@ -195,10 +195,15 @@ public class FacturaController {
             boolean todasCompletas = true;
             for (DetalleOC doc : oc.getDetalles()) {
                 double cantFacturada = 0;
-                for (DetalleComprobante dc : factura.getDetalles()) {
-                    if (dc.getProducto().getCodigoInterno()
-                            .equals(doc.getProducto().getCodigoInterno()))
-                        cantFacturada += dc.getCantidad();
+                for (Comprobante c : comprobantes) {
+                    if (!(c instanceof Factura)) continue;
+                    Factura f = (Factura) c;
+                    if (!f.getOrdenesCompraAsociadas().contains(oc)) continue;
+                    for (DetalleComprobante dc : f.getDetalles()) {
+                        if (dc.getProducto().getCodigoInterno()
+                                .equals(doc.getProducto().getCodigoInterno()))
+                            cantFacturada += dc.getCantidad();
+                    }
                 }
                 if (cantFacturada > 0) algunaLineaFacturada = true;
                 if (cantFacturada < doc.getCantidad()) todasCompletas = false;

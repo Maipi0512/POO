@@ -40,7 +40,7 @@ public final class AppContext {
         OrdenCompraController.inicializar(proveedores, productos, ordenesCompra, usuarios);
         FacturaController.inicializar(proveedores, ordenesCompra, comprobantes, usuarios);
         OrdenPagoController.inicializar(proveedores, impuestos, ordenesPago);
-        ReportesController.inicializar(proveedores, comprobantes, ordenesPago, productos);
+        ReportesController.inicializar(proveedores, comprobantes, ordenesPago, productos, ordenesCompra);
         UsuarioController.inicializar(usuarios);
     }
 
