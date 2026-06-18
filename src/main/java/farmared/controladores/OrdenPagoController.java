@@ -8,6 +8,7 @@ import farmared.modelo.modulos.m3_impuestos.Impuesto;
 import farmared.modelo.modulos.m6_ordenes_pago.MedioPago;
 import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
 import farmared.modelo.modulos.m3_impuestos.Retencion;
+import farmared.dto.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -129,12 +130,63 @@ public class OrdenPagoController {
     }
 
     public List<OrdenPago> getOrdenesEmitidas()  { return new ArrayList<>(ordenesPago); }
+    public List<OrdenPagoDTO> getOrdenesEmitidasDTO() { return DtoMapper.toOrdenPagoDTOList(ordenesPago); }
+
     public List<Proveedor> getProveedores()       { return new ArrayList<>(proveedores); }
+    public List<ProveedorDTO> getProveedoresDTO() { return DtoMapper.toProveedorDTOList(proveedores); }
 
     public List<OrdenPago> buscarPagosPorProveedor(String cuit) {
         List<OrdenPago> resultado = new ArrayList<>();
         for (OrdenPago op : ordenesPago)
             if (op.getProveedor().getCuit().equals(cuit)) resultado.add(op);
         return resultado;
+    }
+
+    public List<OrdenPagoDTO> buscarPagosPorProveedorDTO(String cuit) {
+        return DtoMapper.toOrdenPagoDTOList(buscarPagosPorProveedor(cuit));
+    }
+
+    public List<ComprobanteDTO> iniciarOrdenPagoDTO(String cuitProveedor) {
+        return DtoMapper.toComprobanteDTOList(iniciarOrdenPago(cuitProveedor));
+    }
+
+    private final java.util.Map<String, OrdenPago> opDrafts = new java.util.HashMap<>();
+
+    public OrdenPagoDTO seleccionarComprobantesDTO(String cuitProveedor,
+                                                  Map<String, Double> seleccion,
+                                                  Date fechaEmision) {
+        Proveedor prov = buscarProveedorPorId(cuitProveedor);
+        if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado.");
+
+        java.util.Map<Comprobante, Double> domainSeleccion = new java.util.LinkedHashMap<>();
+        for (Map.Entry<String, Double> e : seleccion.entrySet()) {
+            Comprobante comp = null;
+            for (Comprobante c : prov.getComprobantes()) {
+                if (c.getNumero().equals(e.getKey())) {
+                    comp = c;
+                    break;
+                }
+            }
+            if (comp == null) throw new IllegalArgumentException("Comprobante " + e.getKey() + " no encontrado.");
+            domainSeleccion.put(comp, e.getValue());
+        }
+
+        OrdenPago op = seleccionarComprobantes(cuitProveedor, domainSeleccion, fechaEmision);
+        opDrafts.put(op.getNumero(), op);
+        return DtoMapper.toDTO(op);
+    }
+
+    public void confirmarPagoDTO(String numeroOP, List<MedioPago> mediosPago) {
+        OrdenPago op = opDrafts.remove(numeroOP);
+        if (op == null) {
+            for (OrdenPago o : ordenesPago) {
+                if (o.getNumero().equals(numeroOP)) {
+                    op = o;
+                    break;
+                }
+            }
+        }
+        if (op == null) throw new IllegalArgumentException("Orden de pago no encontrada o ya procesada.");
+        confirmarPago(op, mediosPago);
     }
 }

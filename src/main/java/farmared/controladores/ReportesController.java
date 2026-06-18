@@ -11,6 +11,7 @@ import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
 import farmared.modelo.modulos.m5_comprobantes.Factura;
 import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
 import farmared.modelo.modulos.m3_impuestos.Retencion;
+import farmared.dto.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -167,6 +168,7 @@ public class ReportesController {
     }
 
     public List<Proveedor> getProveedores() { return new ArrayList<>(proveedores); }
+    public List<ProveedorDTO> getProveedoresDTO() { return DtoMapper.toProveedorDTOList(proveedores); }
 
     /** Reporte de todas las OC emitidas (opcionalmente filtradas por proveedor). */
     public List<OrdenCompra> listarOrdenesCompra(String cuitProveedor) {
@@ -179,6 +181,10 @@ public class ReportesController {
         return resultado;
     }
 
+    public List<OrdenCompraDTO> listarOrdenesCompraDTO(String cuitProveedor) {
+        return DtoMapper.toOrdenCompraDTOList(listarOrdenesCompra(cuitProveedor));
+    }
+
     /** Reporte de todas las OP emitidas (opcionalmente filtradas por proveedor). */
     public List<OrdenPago> listarOrdenesPago(String cuitProveedor) {
         List<OrdenPago> resultado = new ArrayList<>();
@@ -188,6 +194,34 @@ public class ReportesController {
                 resultado.add(op);
         }
         return resultado;
+    }
+
+    public List<OrdenPagoDTO> listarOrdenesPagoDTO(String cuitProveedor) {
+        return DtoMapper.toOrdenPagoDTOList(listarOrdenesPago(cuitProveedor));
+    }
+
+    public List<ComprobanteDTO> consultarCuentaCorrienteDTO(String cuitProveedor) {
+        return DtoMapper.toComprobanteDTOList(consultarCuentaCorriente(cuitProveedor));
+    }
+
+    public List<ComprobanteDTO> listarDocumentosImpagosDTO(String cuitProveedor) {
+        return DtoMapper.toComprobanteDTOList(listarDocumentosImpagos(cuitProveedor));
+    }
+
+    public List<ComprobanteDTO> consultarFacturasPorDiaDTO(Date fecha, String cuitProveedor) {
+        List<Comprobante> temp = new ArrayList<>();
+        for (Factura f : consultarFacturasPorDia(fecha, cuitProveedor)) {
+            temp.add(f);
+        }
+        return DtoMapper.toComprobanteDTOList(temp);
+    }
+
+    public List<OrdenPagoDTO> buscarPagosPorProveedorDTO(String cuit) {
+        return DtoMapper.toOrdenPagoDTOList(buscarPagosPorProveedor(cuit));
+    }
+
+    public List<PrecioAcordadoDTO> consultarCompulsaPreciosDTO(String codigoProducto) {
+        return DtoMapper.toPrecioAcordadoDTOList(consultarCompulsaPrecios(codigoProducto));
     }
 
     private boolean mismaFecha(Date a, Date b) {

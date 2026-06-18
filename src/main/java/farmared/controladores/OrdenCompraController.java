@@ -9,6 +9,7 @@ import farmared.modelo.modulos.m2_productos.PrecioAcordado;
 import farmared.modelo.modulos.m2_productos.Producto;
 import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
+import farmared.dto.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,6 +132,10 @@ public class OrdenCompraController {
         return resultado;
     }
 
+    public List<ProductoDTO> listarProductosPorProveedorDTO(String cuitProveedor) {
+        return DtoMapper.toProductoDTOList(listarProductosPorProveedor(cuitProveedor));
+    }
+
     public double obtenerPrecioVigente(String codigoProducto, String cuitProveedor) {
         Producto producto = buscarProductoPorCodigo(codigoProducto);
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
@@ -139,12 +144,48 @@ public class OrdenCompraController {
         return (precio != null && precio.estaVigente()) ? precio.getPrecioUnitario() : -1;
     }
 
+    public boolean requiereSupervisorParaTope(String cuitProveedor, List<ItemCarritoDTO> items) {
+        Proveedor prov = buscarProveedorPorId(cuitProveedor);
+        if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado.");
+        double totalOC = 0.0;
+        for (ItemCarritoDTO item : items) {
+            totalOC += item.getCantidad() * item.getPrecioUnitario();
+        }
+        return !prov.validarNuevaOC(totalOC);
+    }
+
+    public OrdenCompraDTO emitirOrdenCompraDTO(String cuitProveedor, List<ItemCarritoDTO> items, String supervisorUsername, String motivo) {
+        OrdenCompra oc = crearOrdenCompra(cuitProveedor);
+        int linea = 1;
+        for (ItemCarritoDTO item : items) {
+            agregarItemConPrecio(oc, item.getCodigoProducto(), item.getCantidad(), linea++, item.getPrecioUnitario());
+        }
+        Usuario supervisor = null;
+        if (supervisorUsername != null && !supervisorUsername.isBlank()) {
+            for (Usuario u : usuarios) {
+                if (u.getUsername().equals(supervisorUsername)) {
+                    supervisor = u;
+                    break;
+                }
+            }
+        }
+        OrdenCompra emitida = emitirOrdenCompra(oc, supervisor, motivo);
+        return DtoMapper.toDTO(emitida);
+    }
+
     public List<Proveedor> getProveedores()    { return new ArrayList<>(proveedores); }
+    public List<ProveedorDTO> getProveedoresDTO() { return DtoMapper.toProveedorDTOList(proveedores); }
+
     public List<OrdenCompra> getOrdenesCompra() { return new ArrayList<>(ordenesCompra); }
+    public List<OrdenCompraDTO> getOrdenesCompraDTO() { return DtoMapper.toOrdenCompraDTOList(ordenesCompra); }
 
     public List<Usuario> listarSupervisores() {
         List<Usuario> sup = new ArrayList<>();
         for (Usuario u : usuarios) if (u.esAutorizador()) sup.add(u);
         return sup;
+    }
+
+    public List<UsuarioDTO> listarSupervisoresDTO() {
+        return DtoMapper.toUsuarioDTOList(listarSupervisores());
     }
 }

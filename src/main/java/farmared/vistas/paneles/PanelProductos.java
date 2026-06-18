@@ -1,16 +1,14 @@
 package farmared.vistas.paneles;
 
 import farmared.modelo.enums.TipoIVA;
-import farmared.modelo.modulos.m1_proveedores.Proveedor;
-import farmared.modelo.modulos.m1_proveedores.Rubro;
-import farmared.modelo.modulos.m2_productos.PrecioAcordado;
-import farmared.modelo.modulos.m2_productos.Producto;
+import farmared.dto.ProveedorDTO;
+import farmared.dto.RubroDTO;
+import farmared.dto.PrecioAcordadoDTO;
+import farmared.dto.ProductoDTO;
 import farmared.controladores.AppContext;
 import farmared.controladores.ProductoController;
 import farmared.controladores.ProveedorController;
 import farmared.vistas.util.UiUtil;
-
-
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -27,8 +25,8 @@ public class PanelProductos extends JPanel {
     private final JTextField descripcion = new JTextField(20);
     private final JTextField unidad = new JTextField(10);
     private final JComboBox<TipoIVA> tipoIVA = new JComboBox<>(TipoIVA.values());
-    private final JComboBox<Rubro> rubro = new JComboBox<>();
-    private final JComboBox<Proveedor> proveedor = new JComboBox<>();
+    private final JComboBox<RubroDTO> rubro = new JComboBox<>();
+    private final JComboBox<ProveedorDTO> proveedor = new JComboBox<>();
     private final JTextField precio = new JTextField(10);
 
     public PanelProductos() {
@@ -91,14 +89,14 @@ public class PanelProductos extends JPanel {
 
     public void cargarDatos() {
         rubro.removeAllItems();
-        for (Rubro r : provCtrl.listarRubros()) rubro.addItem(r);
+        for (RubroDTO r : provCtrl.listarRubrosDTO()) rubro.addItem(r);
 
         proveedor.removeAllItems();
-        for (Proveedor p : provCtrl.listarProveedores()) proveedor.addItem(p);
+        for (ProveedorDTO p : provCtrl.listarProveedoresDTO()) proveedor.addItem(p);
 
         DefaultTableModel model = (DefaultTableModel) tabla.getModel();
         model.setRowCount(0);
-        for (Producto prod : prodCtrl.listarTodos()) {
+        for (ProductoDTO prod : prodCtrl.listarTodosDTO()) {
             model.addRow(new Object[]{
                     prod.getCodigoInterno(),
                     prod.getDescripcion(),
@@ -130,20 +128,20 @@ public class PanelProductos extends JPanel {
             if (rubro.getSelectedItem() == null || proveedor.getSelectedItem() == null)
                 throw new IllegalArgumentException("Seleccione rubro y proveedor.");
 
-            Producto producto = new Producto(
-                    codigo.getText().trim(), descripcion.getText().trim(),
-                    unidad.getText().trim().isEmpty() ? "unidad" : unidad.getText().trim(),
-                    (TipoIVA) tipoIVA.getSelectedItem(), (Rubro) rubro.getSelectedItem()
-            );
-
+            RubroDTO rDto = (RubroDTO) rubro.getSelectedItem();
+            ProveedorDTO pDto = (ProveedorDTO) proveedor.getSelectedItem();
+            Double precioInicial = null;
             if (!precio.getText().trim().isEmpty()) {
-                double valor = UiUtil.parsearDouble(precio.getText(), "Precio");
-                producto.agregarPrecioAcordado(
-                        new PrecioAcordado(valor, new Date(), null, (Proveedor) proveedor.getSelectedItem())
-                );
+                precioInicial = UiUtil.parsearDouble(precio.getText(), "Precio");
             }
 
-            prodCtrl.registrarProducto(producto);
+            prodCtrl.registrarProductoDTO(
+                    codigo.getText().trim(), descripcion.getText().trim(),
+                    unidad.getText().trim().isEmpty() ? "unidad" : unidad.getText().trim(),
+                    (TipoIVA) tipoIVA.getSelectedItem(), rDto.getIdRubro(),
+                    pDto.getCuit(), precioInicial
+            );
+
             UiUtil.mostrarInfo(this, "Producto registrado.");
             cargarDatos();
         } catch (Exception ex) { UiUtil.mostrarError(this, ex.getMessage()); }
@@ -155,11 +153,11 @@ public class PanelProductos extends JPanel {
                 throw new IllegalArgumentException("Ingrese codigo y precio.");
             if (proveedor.getSelectedItem() == null)
                 throw new IllegalArgumentException("Seleccione proveedor.");
-            Producto existente = prodCtrl.buscarProductoPorCodigo(codigo.getText().trim());
+            ProductoDTO existente = prodCtrl.buscarProductoDTO(codigo.getText().trim());
             if (existente == null)
                 throw new IllegalArgumentException("Producto no encontrado. Use 'Registrar producto' primero.");
             double valor = UiUtil.parsearDouble(precio.getText(), "Precio");
-            Proveedor prov = (Proveedor) proveedor.getSelectedItem();
+            ProveedorDTO prov = (ProveedorDTO) proveedor.getSelectedItem();
             prodCtrl.agregarPrecioAcordado(codigo.getText().trim(), prov.getCuit(), valor);
             UiUtil.mostrarInfo(this, "Precio agregado para " + prov.getRazonSocial());
             cargarDatos();
@@ -171,11 +169,11 @@ public class PanelProductos extends JPanel {
         if (fila < 0) { UiUtil.mostrarError(this, "Seleccione un producto."); return; }
         String cod = (String) tabla.getValueAt(fila, 0);
         StringBuilder sb = new StringBuilder("Compulsa de precios - ").append(cod).append("\n\n");
-        for (PrecioAcordado pa : prodCtrl.consultarCompulsaPrecios(cod)) {
-            sb.append(pa.getProveedor().getRazonSocial())
+        for (PrecioAcordadoDTO pa : prodCtrl.consultarCompulsaPreciosDTO(cod)) {
+            sb.append(pa.getRazonSocialProveedor())
               .append(" | $").append(pa.getPrecioUnitario())
               .append(" | ").append(UiUtil.formatearFecha(pa.getFechaAcuerdo()))
-              .append(pa.estaVigente() ? " (vigente)" : " (historico)").append("\n");
+              .append(pa.isVigente() ? " (vigente)" : " (historico)").append("\n");
         }
         JTextArea area = new JTextArea(sb.toString(), 12, 40);
         area.setEditable(false);

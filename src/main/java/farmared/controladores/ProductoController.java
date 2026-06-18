@@ -1,8 +1,10 @@
 package farmared.controladores;
 
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
+import farmared.modelo.modulos.m1_proveedores.Rubro;
 import farmared.modelo.modulos.m2_productos.PrecioAcordado;
 import farmared.modelo.modulos.m2_productos.Producto;
+import farmared.dto.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +44,27 @@ public class ProductoController {
         productos.add(producto);
     }
 
+    public void registrarProductoDTO(String codigoInterno, String descripcion, String unidadMedida,
+                                     farmared.modelo.enums.TipoIVA tipoIVA, int idRubro,
+                                     String cuitProveedor, Double precioInicial) {
+        Rubro rubro = null;
+        for (Rubro r : AppContext.getInstancia().getProveedorCtrl().listarRubros()) {
+            if (r.getIdRubro() == idRubro) {
+                rubro = r;
+                break;
+            }
+        }
+        if (rubro == null) throw new IllegalArgumentException("Rubro no encontrado.");
+
+        Producto prod = new Producto(codigoInterno, descripcion, unidadMedida, tipoIVA, rubro);
+        if (precioInicial != null) {
+            Proveedor prov = buscarProveedorPorId(cuitProveedor);
+            if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado.");
+            prod.agregarPrecioAcordado(new PrecioAcordado(precioInicial, new Date(), null, prov));
+        }
+        registrarProducto(prod);
+    }
+
     // RF-05: Dar de baja
     public void darBajaProducto(String codigoInterno) {
         Producto p = buscarProductoPorCodigo(codigoInterno);
@@ -73,6 +96,10 @@ public class ProductoController {
         return p != null ? p.obtenerPreciosHistoricos() : Collections.emptyList();
     }
 
+    public List<PrecioAcordadoDTO> consultarCompulsaPreciosDTO(String codigoProducto) {
+        return DtoMapper.toPrecioAcordadoDTOList(consultarCompulsaPrecios(codigoProducto));
+    }
+
     // RF-06: Productos del proveedor (DS1 loop "listar productos")
     public List<Producto> listarProductosPorProveedor(String cuitProveedor) {
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
@@ -92,7 +119,16 @@ public class ProductoController {
         return null;
     }
 
+    public ProductoDTO buscarProductoDTO(String codigo) {
+        return DtoMapper.toDTO(buscarProductoPorCodigo(codigo));
+    }
+
     public List<Producto> listarTodos() { return new ArrayList<>(productos); }
+    public List<ProductoDTO> listarTodosDTO() { return DtoMapper.toProductoDTOList(productos); }
+
+    public List<ProductoDTO> listarProductosPorProveedorDTO(String cuitProveedor) {
+        return DtoMapper.toProductoDTOList(listarProductosPorProveedor(cuitProveedor));
+    }
 
     private Proveedor buscarProveedorPorId(String cuit) {
         for (Proveedor p : proveedores)

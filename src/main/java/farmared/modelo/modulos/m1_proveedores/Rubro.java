@@ -15,12 +15,9 @@ public class Rubro {
         if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException("El nombre del rubro no puede ser vacio.");
         }
-        if (descripcion == null || descripcion.isBlank()) {
-            throw new IllegalArgumentException("La descripcion del rubro no puede ser vacia.");
-        }
         this.idRubro = idRubro;
         this.nombre = nombre.trim();
-        this.descripcion = descripcion.trim();
+        this.descripcion = descripcion != null ? descripcion.trim() : "";
     }
 
     public int getIdRubro()        { return idRubro; }
@@ -34,10 +31,7 @@ public class Rubro {
         this.nombre = nombre.trim();
     }
     public void setDescripcion(String descripcion) {
-        if (descripcion == null || descripcion.isBlank()) {
-            throw new IllegalArgumentException("La descripcion del rubro no puede ser vacia.");
-        }
-        this.descripcion = descripcion.trim();
+        this.descripcion = descripcion != null ? descripcion.trim() : "";
     }
 
     @Override

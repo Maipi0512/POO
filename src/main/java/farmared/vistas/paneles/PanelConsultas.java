@@ -1,15 +1,14 @@
 package farmared.vistas.paneles;
 
 import farmared.modelo.enums.TipoImpuesto;
-import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.modelo.modulos.m5_comprobantes.Comprobante;
-import farmared.modelo.modulos.m5_comprobantes.Factura;
-import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
+import farmared.dto.ComprobanteDTO;
+import farmared.dto.OrdenCompraDTO;
+import farmared.dto.OrdenPagoDTO;
+import farmared.dto.PrecioAcordadoDTO;
+import farmared.dto.ProveedorDTO;
 import farmared.controladores.AppContext;
 import farmared.controladores.ReportesController;
 import farmared.vistas.util.UiUtil;
-
-
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -75,7 +74,7 @@ public class PanelConsultas extends JPanel {
     public void cargarDatos() {
         comboProveedores.removeAllItems();
         comboProveedores.addItem("");
-        for (var p : ctrl.getProveedores())
+        for (ProveedorDTO p : ctrl.getProveedoresDTO())
             comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
     }
 
@@ -96,10 +95,10 @@ public class PanelConsultas extends JPanel {
 
     private void consultarCuentaCorriente() {
         try {
-            List<Comprobante> docs = ctrl.consultarCuentaCorriente(obtenerCuitSeleccionado());
+            List<ComprobanteDTO> docs = ctrl.consultarCuentaCorrienteDTO(obtenerCuitSeleccionado());
             Object[][] filas = new Object[docs.size()][5];
             for (int i = 0; i < docs.size(); i++) {
-                Comprobante c = docs.get(i);
+                ComprobanteDTO c = docs.get(i);
                 filas[i] = new Object[]{c.getNumero(), c.getTipo(),
                         UiUtil.formatearFecha(c.getFechaEmision()),
                         UiUtil.formatearMoneda(c.getImporteTotal()), UiUtil.formatearMoneda(c.getSaldoPendiente())};
@@ -110,10 +109,10 @@ public class PanelConsultas extends JPanel {
 
     private void consultarImpagos() {
         try {
-            List<Comprobante> docs = ctrl.listarDocumentosImpagos(obtenerCuitSeleccionado());
+            List<ComprobanteDTO> docs = ctrl.listarDocumentosImpagosDTO(obtenerCuitSeleccionado());
             Object[][] filas = new Object[docs.size()][4];
             for (int i = 0; i < docs.size(); i++) {
-                Comprobante c = docs.get(i);
+                ComprobanteDTO c = docs.get(i);
                 filas[i] = new Object[]{c.getNumero(), c.getTipo(),
                         UiUtil.formatearFecha(c.getFechaEmision()), UiUtil.formatearMoneda(c.getSaldoPendiente())};
             }
@@ -155,14 +154,14 @@ public class PanelConsultas extends JPanel {
         try {
             String codigo = codigoProducto.getText().trim();
             if (codigo.isEmpty()) throw new IllegalArgumentException("Ingrese codigo de producto.");
-            var precios = ctrl.consultarCompulsaPrecios(codigo);
+            var precios = ctrl.consultarCompulsaPreciosDTO(codigo);
             Object[][] filas = new Object[precios.size()][4];
             for (int i = 0; i < precios.size(); i++) {
-                var pa = precios.get(i);
-                filas[i] = new Object[]{pa.getProveedor().getRazonSocial(),
+                PrecioAcordadoDTO pa = precios.get(i);
+                filas[i] = new Object[]{pa.getRazonSocialProveedor(),
                         UiUtil.formatearMoneda(pa.getPrecioUnitario()),
                         UiUtil.formatearFecha(pa.getFechaAcuerdo()),
-                        pa.estaVigente() ? "Vigente" : "Historico"};
+                        pa.isVigente() ? "Vigente" : "Historico"};
             }
             setTabla("Compulsa de precios - " + codigo,
                     new String[]{"Proveedor", "Precio", "Fecha acuerdo", "Estado"}, filas);
@@ -173,11 +172,11 @@ public class PanelConsultas extends JPanel {
         try {
             String cuit = (comboProveedores.getSelectedItem() == null
                     || comboProveedores.getSelectedItem().equals("")) ? null : obtenerCuitSeleccionado();
-            List<Factura> facturas = ctrl.consultarFacturasPorDia(new Date(), cuit);
+            List<ComprobanteDTO> facturas = ctrl.consultarFacturasPorDiaDTO(new Date(), cuit);
             Object[][] filas = new Object[facturas.size()][4];
             for (int i = 0; i < facturas.size(); i++) {
-                Factura f = facturas.get(i);
-                filas[i] = new Object[]{f.getNumero(), f.getProveedor().getRazonSocial(),
+                ComprobanteDTO f = facturas.get(i);
+                filas[i] = new Object[]{f.getNumero(), f.getRazonSocialProveedor(),
                         UiUtil.formatearMoneda(f.getImporteTotal()), UiUtil.formatearFecha(f.getFechaRecepcion())};
             }
             setTabla("Facturas recibidas hoy", new String[]{"Numero", "Proveedor", "Importe", "Recepcion"}, filas);
@@ -186,10 +185,10 @@ public class PanelConsultas extends JPanel {
 
     private void consultarPagos() {
         try {
-            List<OrdenPago> pagos = ctrl.buscarPagosPorProveedor(obtenerCuitSeleccionado());
+            List<OrdenPagoDTO> pagos = ctrl.buscarPagosPorProveedorDTO(obtenerCuitSeleccionado());
             Object[][] filas = new Object[pagos.size()][5];
             for (int i = 0; i < pagos.size(); i++) {
-                OrdenPago op = pagos.get(i);
+                OrdenPagoDTO op = pagos.get(i);
                 filas[i] = new Object[]{op.getNumero(), UiUtil.formatearFecha(op.getFechaEmision()),
                         UiUtil.formatearMoneda(op.getImporteBruto()),
                         UiUtil.formatearMoneda(op.getTotalRetenciones()),
@@ -202,12 +201,12 @@ public class PanelConsultas extends JPanel {
     private void consultarOrdenesCompra() {
         String cuit = comboProveedores.getSelectedItem() == null
                 || comboProveedores.getSelectedItem().equals("") ? null : obtenerCuitSeleccionado();
-        List<OrdenCompra> ocs = ctrl.listarOrdenesCompra(cuit);
+        List<OrdenCompraDTO> ocs = ctrl.listarOrdenesCompraDTO(cuit);
         Object[][] filas = new Object[ocs.size()][5];
         for (int i = 0; i < ocs.size(); i++) {
-            OrdenCompra oc = ocs.get(i);
+            OrdenCompraDTO oc = ocs.get(i);
             filas[i] = new Object[]{oc.getNumero(),
-                    oc.getProveedor().getRazonSocial(),
+                    oc.getRazonSocialProveedor(),
                     UiUtil.formatearFecha(oc.getFechaEmision()),
                     UiUtil.formatearMoneda(oc.getImporteTotal()),
                     oc.getEstado()};
@@ -219,12 +218,12 @@ public class PanelConsultas extends JPanel {
     private void consultarOrdenesPago() {
         String cuit = comboProveedores.getSelectedItem() == null
                 || comboProveedores.getSelectedItem().equals("") ? null : obtenerCuitSeleccionado();
-        List<OrdenPago> ops = ctrl.listarOrdenesPago(cuit);
+        List<OrdenPagoDTO> ops = ctrl.listarOrdenesPagoDTO(cuit);
         Object[][] filas = new Object[ops.size()][5];
         for (int i = 0; i < ops.size(); i++) {
-            OrdenPago op = ops.get(i);
+            OrdenPagoDTO op = ops.get(i);
             filas[i] = new Object[]{op.getNumero(),
-                    op.getProveedor().getRazonSocial(),
+                    op.getRazonSocialProveedor(),
                     UiUtil.formatearFecha(op.getFechaEmision()),
                     UiUtil.formatearMoneda(op.getImporteNeto()),
                     op.getEstado()};

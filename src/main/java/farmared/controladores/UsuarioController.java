@@ -1,6 +1,7 @@
 package farmared.controladores;
 
 import farmared.modelo.modulos.m8_usuarios.Usuario;
+import farmared.dto.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +38,20 @@ public class UsuarioController {
         return null;
     }
 
+    public UsuarioDTO autenticarUsuarioDTO(String username, String password) {
+        return DtoMapper.toDTO(autenticarUsuario(username, password));
+    }
+
     public List<Usuario> listarSupervisores() {
         List<Usuario> sup = new ArrayList<>();
         for (Usuario u : usuarios) if (u.esAutorizador()) sup.add(u);
         return sup;
     }
 
+    public List<UsuarioDTO> listarSupervisoresDTO() {
+        return DtoMapper.toUsuarioDTOList(listarSupervisores());
+    }
+
     public List<Usuario> listarTodos() { return new ArrayList<>(usuarios); }
+    public List<UsuarioDTO> listarTodosDTO() { return DtoMapper.toUsuarioDTOList(usuarios); }
 }

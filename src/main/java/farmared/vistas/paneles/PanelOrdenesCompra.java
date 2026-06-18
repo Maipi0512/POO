@@ -1,14 +1,14 @@
 package farmared.vistas.paneles;
 
-import farmared.modelo.modulos.m2_productos.Producto;
-import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
-import farmared.modelo.modulos.m8_usuarios.Usuario;
+import farmared.dto.ProductoDTO;
+import farmared.dto.ProveedorDTO;
+import farmared.dto.OrdenCompraDTO;
+import farmared.dto.UsuarioDTO;
+import farmared.dto.ItemCarritoDTO;
 import farmared.controladores.AppContext;
 import farmared.controladores.OrdenCompraController;
 import farmared.vistas.util.CarritoUtil;
 import farmared.vistas.util.UiUtil;
-
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -21,7 +21,7 @@ public class PanelOrdenesCompra extends JPanel {
     private final OrdenCompraController ctrl = AppContext.getInstancia().getOrdenCompraCtrl();
 
     private final JComboBox<String> comboProveedores = new JComboBox<>();
-    private final JComboBox<Producto> comboProductos = new JComboBox<>();
+    private final JComboBox<ProductoDTO> comboProductos = new JComboBox<>();
     private final JTable tablaDetalle = new JTable();
     private final JTable tablaOC = new JTable();
     private final JTextField cantidad = new JTextField(6);
@@ -29,15 +29,15 @@ public class PanelOrdenesCompra extends JPanel {
     private final JLabel lblCarrito = new JLabel("Carrito: 0 item(s) | Total: $0.00");
 
     private final List<ItemCarritoOC> carrito = new ArrayList<>();
-    private final List<OrdenCompra> ocsTabla = new ArrayList<>();
+    private final List<OrdenCompraDTO> ocsTabla = new ArrayList<>();
     private String cuitProveedorActual;
 
     private static class ItemCarritoOC {
-        final Producto producto;
+        final ProductoDTO producto;
         final double cantidad;
         final double precioUnitario;
 
-        ItemCarritoOC(Producto producto, double cantidad, double precioUnitario) {
+        ItemCarritoOC(ProductoDTO producto, double cantidad, double precioUnitario) {
             this.producto = producto;
             this.cantidad = cantidad;
             this.precioUnitario = precioUnitario;
@@ -105,17 +105,17 @@ public class PanelOrdenesCompra extends JPanel {
 
     public void cargarDatos() {
         comboProveedores.removeAllItems();
-        for (var p : ctrl.getProveedores())
+        for (ProveedorDTO p : ctrl.getProveedoresDTO())
             comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
         cambiarProveedor();
 
         DefaultTableModel model = (DefaultTableModel) tablaOC.getModel();
         model.setRowCount(0);
         ocsTabla.clear();
-        for (OrdenCompra oc : ctrl.getOrdenesCompra()) {
+        for (OrdenCompraDTO oc : ctrl.getOrdenesCompraDTO()) {
             ocsTabla.add(oc);
             model.addRow(new Object[]{
-                    oc.getNumero(), oc.getProveedor().getRazonSocial(), oc.getDetalles().size(),
+                    oc.getNumero(), oc.getRazonSocialProveedor(), oc.getDetalles().size(),
                     UiUtil.formatearFecha(oc.getFechaEmision()),
                     UiUtil.formatearMoneda(oc.getImporteTotal()), oc.getEstado()
             });
@@ -134,7 +134,7 @@ public class PanelOrdenesCompra extends JPanel {
             }
             cuitProveedorActual = nuevoCuit;
             comboProductos.removeAllItems();
-            for (Producto p : ctrl.listarProductosPorProveedor(nuevoCuit)) comboProductos.addItem(p);
+            for (ProductoDTO p : ctrl.listarProductosPorProveedorDTO(nuevoCuit)) comboProductos.addItem(p);
         } catch (Exception ignored) {}
     }
 
@@ -153,7 +153,7 @@ public class PanelOrdenesCompra extends JPanel {
     }
 
     private void autocompletarPrecio() {
-        Producto prod = (Producto) comboProductos.getSelectedItem();
+        ProductoDTO prod = (ProductoDTO) comboProductos.getSelectedItem();
         if (prod == null) { precioUnitario.setText(""); return; }
         try {
             double precio = ctrl.obtenerPrecioVigente(prod.getCodigoInterno(), obtenerCuitSeleccionado());
@@ -164,7 +164,7 @@ public class PanelOrdenesCompra extends JPanel {
 
     private void agregarItem() {
         try {
-            Producto producto = (Producto) comboProductos.getSelectedItem();
+            ProductoDTO producto = (ProductoDTO) comboProductos.getSelectedItem();
             if (producto == null) throw new IllegalArgumentException("Seleccione un producto.");
             double cant = UiUtil.parsearDouble(cantidad.getText(), "Cantidad");
             if (cant <= 0) throw new IllegalArgumentException("La cantidad debe ser mayor a cero.");
@@ -197,33 +197,32 @@ public class PanelOrdenesCompra extends JPanel {
                 carrito.size(), UiUtil.formatearMoneda(total)))) return;
         try {
             String cuit = obtenerCuitSeleccionado();
-            OrdenCompra oc = ctrl.crearOrdenCompra(cuit);
-            int linea = 1;
-            for (ItemCarritoOC item : carrito)
-                ctrl.agregarItemConPrecio(oc, item.producto.getCodigoInterno(), item.cantidad, linea++, item.precioUnitario);
-
-            Usuario supervisor = null;
-            oc.calcularTotal();
-            if (!oc.validarTopeDeuda()) {
-                supervisor = solicitarSupervisor("La OC supera el tope de deuda del proveedor.");
+            List<ItemCarritoDTO> dtos = new ArrayList<>();
+            for (ItemCarritoOC item : carrito) {
+                dtos.add(new ItemCarritoDTO(item.producto.getCodigoInterno(), item.cantidad, item.precioUnitario));
+            }
+            String supervisorUsername = null;
+            if (ctrl.requiereSupervisorParaTope(cuit, dtos)) {
+                UsuarioDTO supervisor = solicitarSupervisor("La OC supera el tope de deuda del proveedor.");
                 if (supervisor == null) return;
+                supervisorUsername = supervisor.getUsername();
             }
 
-            ctrl.emitirOrdenCompra(oc, supervisor, "Autorizacion desde interfaz grafica");
+            OrdenCompraDTO oc = ctrl.emitirOrdenCompraDTO(cuit, dtos, supervisorUsername, "Autorizacion desde interfaz grafica");
             UiUtil.mostrarInfo(this, String.format(
                     "OC emitida: %s\nProveedor: %s\n%d item(s) | Total: %s",
-                    oc.getNumero(), oc.getProveedor().getRazonSocial(),
+                    oc.getNumero(), oc.getRazonSocialProveedor(),
                     oc.getDetalles().size(), UiUtil.formatearMoneda(oc.getImporteTotal())
             ));
             carrito.clear(); refrescarCarrito(); cargarDatos();
         } catch (Exception ex) { UiUtil.mostrarError(this, ex.getMessage()); }
     }
 
-    private Usuario solicitarSupervisor(String motivo) {
+    private UsuarioDTO solicitarSupervisor(String motivo) {
         if (!UiUtil.confirmar(this, motivo + "\nDesea solicitar autorizacion de supervisor?")) return null;
-        List<Usuario> supervisores = ctrl.listarSupervisores();
+        List<UsuarioDTO> supervisores = ctrl.listarSupervisoresDTO();
         if (supervisores.isEmpty()) { UiUtil.mostrarError(this, "No hay supervisores registrados."); return null; }
-        return (Usuario) JOptionPane.showInputDialog(
+        return (UsuarioDTO) JOptionPane.showInputDialog(
                 this, "Seleccione supervisor:", "Autorizacion",
                 JOptionPane.QUESTION_MESSAGE, null, supervisores.toArray(), supervisores.get(0));
     }
@@ -250,12 +249,12 @@ public class PanelOrdenesCompra extends JPanel {
             refrescarCarrito();
             return;
         }
-        OrdenCompra oc = ocsTabla.get(fila);
+        OrdenCompraDTO oc = ocsTabla.get(fila);
         DefaultTableModel model = (DefaultTableModel) tablaDetalle.getModel();
         model.setRowCount(0);
-        for (DetalleOC d : oc.getDetalles()) {
+        for (OrdenCompraDTO.DetalleOCDTO d : oc.getDetalles()) {
             model.addRow(new Object[]{
-                    d.getNroLinea(), d.getProducto().getCodigoInterno(), d.getProducto().getDescripcion(),
+                    d.getNroLinea(), d.getCodigoProducto(), d.getDescripcionProducto(),
                     d.getCantidad(), UiUtil.formatearMoneda(d.getPrecioUnitario()),
                     UiUtil.formatearMoneda(d.getSubtotal())
             });

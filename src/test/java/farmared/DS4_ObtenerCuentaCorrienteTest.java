@@ -68,7 +68,7 @@ public class DS4_ObtenerCuentaCorrienteTest {
         producto.agregarPrecioAcordado(new PrecioAcordado(100.0, new Date(0), null, proveedor));
         productos.add(producto);
 
-        ReportesController.inicializar(proveedores, comprobantes, ordenesPago, productos);
+        ReportesController.inicializar(proveedores, comprobantes, ordenesPago, productos, new ArrayList<>());
         ctrl = ReportesController.getInstance();
     }
 

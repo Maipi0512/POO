@@ -164,7 +164,7 @@ public class MainTest {
         OrdenCompraController.inicializar(proveedores, productos, ordenesCompra, usuarios);
         OrdenPagoController.inicializar(proveedores, impuestos, ordenesPago);
         FacturaController.inicializar(proveedores, ordenesCompra, comprobantes, usuarios);
-        ReportesController.inicializar(proveedores, comprobantes, ordenesPago, productos);
+        ReportesController.inicializar(proveedores, comprobantes, ordenesPago, productos, ordenesCompra);
     }
 
     // =========================================================================
