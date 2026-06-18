@@ -1,6 +1,7 @@
 package farmared.vistas.paneles;
 
 import farmared.modelo.enums.TipoImpuesto;
+import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
 import farmared.modelo.modulos.m5_comprobantes.Comprobante;
 import farmared.modelo.modulos.m5_comprobantes.Factura;
 import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
@@ -43,12 +44,15 @@ public class PanelConsultas extends JPanel {
         JButton compulsa       = new JButton("Compulsa precios");
         JButton facturasDia    = new JButton("Facturas del dia");
         JButton pagos          = new JButton("Pagos por proveedor");
+        JButton ordenesCompra  = new JButton("Ordenes de compra");
+        JButton ordenesPago    = new JButton("Ordenes de pago");
 
         superior.add(new JLabel("Proveedor:")); superior.add(comboProveedores);
         superior.add(codigoProducto);
         superior.add(cuentaCorriente); superior.add(impagos); superior.add(deuda);
         superior.add(retenciones); superior.add(libroIVA); superior.add(compulsa);
         superior.add(facturasDia); superior.add(pagos);
+        superior.add(ordenesCompra); superior.add(ordenesPago);
 
         cuentaCorriente.addActionListener(e -> consultarCuentaCorriente());
         impagos.addActionListener(e -> consultarImpagos());
@@ -58,6 +62,8 @@ public class PanelConsultas extends JPanel {
         compulsa.addActionListener(e -> consultarCompulsa());
         facturasDia.addActionListener(e -> consultarFacturasDia());
         pagos.addActionListener(e -> consultarPagos());
+        ordenesCompra.addActionListener(e -> consultarOrdenesCompra());
+        ordenesPago.addActionListener(e -> consultarOrdenesPago());
 
         add(superior, BorderLayout.NORTH);
         add(lblTitulo, BorderLayout.SOUTH);
@@ -133,15 +139,15 @@ public class PanelConsultas extends JPanel {
 
     private void consultarLibroIVA() {
         List<Map<String, Object>> libro = ctrl.generarLibroIVACompras();
-        Object[][] filas = new Object[libro.size()][8];
+        Object[][] filas = new Object[libro.size()][9];
         for (int i = 0; i < libro.size(); i++) {
             Map<String, Object> l = libro.get(i);
             filas[i] = new Object[]{l.get("cuit"), l.get("razonSocial"),
                     UiUtil.formatearFecha((Date) l.get("fechaEmision")), l.get("tipo"),
-                    l.get("base21"), l.get("iva21"), l.get("base10_5"), l.get("importeTotal")};
+                    l.get("base21"), l.get("iva21"), l.get("base10_5"), l.get("iva10_5"), l.get("importeTotal")};
         }
         setTabla("Libro IVA Compras",
-                new String[]{"CUIT", "Razon Social", "Fecha", "Tipo", "Base 21%", "IVA 21%", "Base 10.5%", "Total"},
+                new String[]{"CUIT", "Razon Social", "Fecha", "Tipo", "Base 21%", "IVA 21%", "Base 10.5%", "IVA 10.5%", "Total"},
                 filas);
     }
 
@@ -191,5 +197,39 @@ public class PanelConsultas extends JPanel {
             }
             setTabla("Pagos del proveedor", new String[]{"OP", "Fecha", "Bruto", "Retenciones", "Neto"}, filas);
         } catch (Exception ex) { UiUtil.mostrarError(this, ex.getMessage()); }
+    }
+
+    private void consultarOrdenesCompra() {
+        String cuit = comboProveedores.getSelectedItem() == null
+                || comboProveedores.getSelectedItem().equals("") ? null : obtenerCuitSeleccionado();
+        List<OrdenCompra> ocs = ctrl.listarOrdenesCompra(cuit);
+        Object[][] filas = new Object[ocs.size()][5];
+        for (int i = 0; i < ocs.size(); i++) {
+            OrdenCompra oc = ocs.get(i);
+            filas[i] = new Object[]{oc.getNumero(),
+                    oc.getProveedor().getRazonSocial(),
+                    UiUtil.formatearFecha(oc.getFechaEmision()),
+                    UiUtil.formatearMoneda(oc.getImporteTotal()),
+                    oc.getEstado()};
+        }
+        setTabla("Ordenes de compra emitidas",
+                new String[]{"Numero", "Proveedor", "Fecha", "Total", "Estado"}, filas);
+    }
+
+    private void consultarOrdenesPago() {
+        String cuit = comboProveedores.getSelectedItem() == null
+                || comboProveedores.getSelectedItem().equals("") ? null : obtenerCuitSeleccionado();
+        List<OrdenPago> ops = ctrl.listarOrdenesPago(cuit);
+        Object[][] filas = new Object[ops.size()][5];
+        for (int i = 0; i < ops.size(); i++) {
+            OrdenPago op = ops.get(i);
+            filas[i] = new Object[]{op.getNumero(),
+                    op.getProveedor().getRazonSocial(),
+                    UiUtil.formatearFecha(op.getFechaEmision()),
+                    UiUtil.formatearMoneda(op.getImporteNeto()),
+                    op.getEstado()};
+        }
+        setTabla("Ordenes de pago emitidas",
+                new String[]{"Numero", "Proveedor", "Fecha", "Neto", "Estado"}, filas);
     }
 }
