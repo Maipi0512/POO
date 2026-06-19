@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn compile *)",
+      "Bash(mvn test *)",
+      "Bash(mvn test-compile *)",
+      "Bash(mkdir -p /home/maipi0512/Escritorio/POO/POO/.vscode)",
+      "Bash(LD_LIBRARY_PATH=\"\" /usr/lib/jvm/java-17-openjdk-amd64/bin/java -cp /home/maipi0512/Escritorio/POO/POO/target/classes farmared.Main)",
+      "Read(//etc/ld.so.conf.d/**)",
+      "Bash(ldd /usr/lib/jvm/java-17-openjdk-amd64/bin/java)",
+      "Bash(/usr/lib/jvm/java-17-openjdk-amd64/bin/java -version)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(mvn exec:java)",
+      "Bash(LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu mvn exec:java -Dexec.mainClass=\"farmared.Main\")",
+      "Bash(env)",
+      "Bash(chmod +x /home/maipi0512/Escritorio/POO/POO/run.sh)",
+      "Bash(chmod +x /home/maipi0512/Escritorio/POO/POO/java-clean.sh)",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO status)",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO log --oneline -3)",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO add pom.xml src/main/java/farmared/controladores/ProductoController.java src/main/java/farmared/modelo/modulos/m2_productos/PrecioAcordado.java src/main/java/farmared/vistas/paneles/PanelComprobantes.java src/main/java/farmared/vistas/paneles/PanelProductos.java src/main/java/farmared/vistas/paneles/PanelProveedores.java src/test/java/farmared/DS4_ObtenerCuentaCorrienteTest.java src/test/java/farmared/MainTest.java java-clean.sh run.sh .vscode/launch.json)",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO add pom.xml src/main/java/farmared/controladores/ProductoController.java src/main/java/farmared/modelo/modulos/m2_productos/PrecioAcordado.java src/main/java/farmared/vistas/paneles/PanelComprobantes.java src/main/java/farmared/vistas/paneles/PanelProductos.java src/main/java/farmared/vistas/paneles/PanelProveedores.java src/test/java/farmared/DS4_ObtenerCuentaCorrienteTest.java src/test/java/farmared/MainTest.java java-clean.sh run.sh)",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO commit -m ' *)",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO config user.email \"mariapaztraversi@gmail.com\")",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO config user.name \"maipi0512\")",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO push)",
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO remote -v)"
+    ],
+    "additionalDirectories": [
+      "/home/maipi0512/Escritorio/POO/POO"
+    ]
+  }
+}
