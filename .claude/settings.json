@@ -23,7 +23,15 @@
       "Bash(git -C /home/maipi0512/Escritorio/POO/POO config user.email \"mariapaztraversi@gmail.com\")",
       "Bash(git -C /home/maipi0512/Escritorio/POO/POO config user.name \"maipi0512\")",
       "Bash(git -C /home/maipi0512/Escritorio/POO/POO push)",
-      "Bash(git -C /home/maipi0512/Escritorio/POO/POO remote -v)"
+      "Bash(git -C /home/maipi0512/Escritorio/POO/POO remote -v)",
+      "Bash(git -C ~/Escritorio/POO/POO log --oneline origin/main ^HEAD)",
+      "Bash(git -C ~/Escritorio/POO/POO log --oneline HEAD ^origin/main)",
+      "Bash(git -C ~/Escritorio/POO/POO diff --name-only HEAD origin/main)",
+      "Bash(git -C ~/Escritorio/POO/POO pull --no-rebase)",
+      "Bash(grep -rn *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ],
     "additionalDirectories": [
       "/home/maipi0512/Escritorio/POO/POO"
