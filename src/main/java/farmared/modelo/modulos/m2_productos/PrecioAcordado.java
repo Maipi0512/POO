@@ -39,6 +39,8 @@ public class PrecioAcordado {
     public Date getFechaFinVigencia()  { return fechaFinVigencia; }
     public Proveedor getProveedor()    { return proveedor; }
 
+    public void setFechaFinVigencia(Date fecha) { this.fechaFinVigencia = fecha; }
+
     @Override
     public String toString() {
         return "Precio{$" + precioUnitario + ", prov=" + proveedor.getRazonSocial()

@@ -38,6 +38,10 @@ public class ProductoController {
         for (Producto p : productos) {
             if (p.getCodigoInterno().equals(producto.getCodigoInterno()))
                 throw new IllegalArgumentException("Codigo duplicado: " + producto.getCodigoInterno());
+            if (p.getDescripcion().equalsIgnoreCase(producto.getDescripcion()))
+                throw new IllegalArgumentException(
+                        "Ya existe un producto con esa descripcion: \"" + p.getDescripcion() + "\".\n" +
+                        "Si es distinta dosis, incluya la dosis en la descripcion (ej: Ibuprofeno 600mg).");
         }
         productos.add(producto);
     }
@@ -49,13 +53,19 @@ public class ProductoController {
         p.setActivo(false);
     }
 
-    // RF-06: Precio acordado
+    // RF-06: Precio acordado (cierra el vigente anterior del mismo proveedor si existe)
     public void agregarPrecioAcordado(String codigoProducto, String cuitProveedor, double precioUnitario) {
         Producto producto = buscarProductoPorCodigo(codigoProducto);
         if (producto == null) throw new IllegalArgumentException("Producto no encontrado: " + codigoProducto);
         Proveedor prov = buscarProveedorPorId(cuitProveedor);
         if (prov == null) throw new IllegalArgumentException("Proveedor no encontrado: " + cuitProveedor);
-        producto.agregarPrecioAcordado(new PrecioAcordado(precioUnitario, new Date(), null, prov));
+        Date hoy = new Date();
+        for (PrecioAcordado pa : producto.getPreciosAcordados()) {
+            if (pa.getProveedor().equals(prov) && pa.estaVigente()) {
+                pa.setFechaFinVigencia(hoy);
+            }
+        }
+        producto.agregarPrecioAcordado(new PrecioAcordado(precioUnitario, hoy, null, prov));
     }
 
     // RF-07: Precio vigente (DS1 loop)

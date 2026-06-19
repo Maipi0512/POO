@@ -143,19 +143,24 @@ public class PanelProveedores extends JPanel {
         int fila = tabla.getSelectedRow();
         if (fila < 0) return;
         String cuitSeleccionado = (String) tabla.getValueAt(fila, 0);
-        cuit.setText(cuitSeleccionado);
-        razonSocial.setText((String) tabla.getValueAt(fila, 1));
-        nombreFantasia.setText((String) tabla.getValueAt(fila, 2));
-        cuit.setEditable(false);
 
-        // Marcar los checkboxes segun los rubros del proveedor
         Proveedor prov = controlador.buscarProveedorPorId(cuitSeleccionado);
-        if (prov != null) {
-            List<Rubro> rubrosDelProv = prov.getRubros();
-            for (JCheckBox cb : checkboxRubros) {
-                Rubro r = (Rubro) cb.getClientProperty("rubro");
-                cb.setSelected(rubrosDelProv.contains(r));
-            }
+        if (prov == null) return;
+
+        cuit.setText(prov.getCuit());
+        cuit.setEditable(false);
+        razonSocial.setText(prov.getRazonSocial());
+        nombreFantasia.setText(prov.getNombreFantasia());
+        domicilio.setText(prov.getDomicilioComercial());
+        telefono.setText(prov.getTelefono());
+        email.setText(prov.getEmail());
+        condicionIVA.setSelectedItem(prov.getCondicionIVA());
+        ingresosBrutos.setText(prov.getNumeroIngresosBrutos());
+        topeDeuda.setText(String.valueOf((long) prov.getTopeMaximoDeuda()));
+
+        for (JCheckBox cb : checkboxRubros) {
+            Rubro r = (Rubro) cb.getClientProperty("rubro");
+            cb.setSelected(prov.getRubros().contains(r));
         }
     }
 
