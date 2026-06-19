@@ -14,11 +14,23 @@ public class Usuario {
 
     public Usuario(int idUsuario, String nombre, String apellido,
                    String username, String password, RolUsuario rol) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre no puede ser vacio.");
+        }
+        if (apellido == null || apellido.isBlank()) {
+            throw new IllegalArgumentException("El apellido no puede ser vacio.");
+        }
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("El username no puede ser vacio.");
+        }
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("El password no puede ser vacio.");
+        }
         this.idUsuario = idUsuario;
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.username = username;
-        this.password = password;
+        this.nombre = nombre.trim();
+        this.apellido = apellido.trim();
+        this.username = username.trim();
+        this.password = password.trim();
         this.rol = rol;
         this.activo = true;
     }

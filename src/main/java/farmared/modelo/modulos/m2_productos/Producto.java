@@ -24,9 +24,18 @@ public class Producto {
 
     public Producto(String codigoInterno, String descripcion,
                     String unidadMedida, TipoIVA tipoIVA, Rubro rubro) {
-        this.codigoInterno = codigoInterno;
-        this.descripcion = descripcion;
-        this.unidadMedida = unidadMedida;
+        if (codigoInterno == null || codigoInterno.isBlank()) {
+            throw new IllegalArgumentException("El codigo interno no puede ser vacio.");
+        }
+        if (descripcion == null || descripcion.isBlank()) {
+            throw new IllegalArgumentException("La descripcion no puede ser vacia.");
+        }
+        if (unidadMedida == null || unidadMedida.isBlank()) {
+            throw new IllegalArgumentException("La unidad de medida no puede ser vacia.");
+        }
+        this.codigoInterno = codigoInterno.trim();
+        this.descripcion = descripcion.trim();
+        this.unidadMedida = unidadMedida.trim();
         this.tipoIVA = tipoIVA;
         this.rubro = rubro;
         this.activo = true;
@@ -68,7 +77,12 @@ public class Producto {
     public List<PrecioAcordado> getPreciosAcordados() { return preciosAcordados; }
 
     public void setActivo(boolean activo)          { this.activo = activo; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public void setDescripcion(String descripcion) {
+        if (descripcion == null || descripcion.isBlank()) {
+            throw new IllegalArgumentException("La descripcion no puede ser vacia.");
+        }
+        this.descripcion = descripcion.trim();
+    }
 
     @Override
     public String toString() {

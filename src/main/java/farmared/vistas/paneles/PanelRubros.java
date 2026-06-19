@@ -1,13 +1,9 @@
 package farmared.vistas.paneles;
 
-import farmared.modelo.modulos.m1_proveedores.Rubro;
-import farmared.vistas.observador.NotificadorSistema;
-import farmared.vistas.observador.ObservadorSistema;
+import farmared.dto.RubroDTO;
 import farmared.controladores.AppContext;
 import farmared.controladores.ProveedorController;
 import farmared.vistas.util.UiUtil;
-
-
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -50,7 +46,7 @@ public class PanelRubros extends JPanel {
     public void cargarDatos() {
         DefaultTableModel model = (DefaultTableModel) tabla.getModel();
         model.setRowCount(0);
-        for (Rubro r : controlador.listarRubros()) {
+        for (RubroDTO r : controlador.listarRubrosDTO()) {
             model.addRow(new Object[]{r.getIdRubro(), r.getNombre(), r.getDescripcion()});
         }
     }
@@ -60,7 +56,7 @@ public class PanelRubros extends JPanel {
             if (nombre.getText().trim().isEmpty()) {
                 throw new IllegalArgumentException("El nombre del rubro es obligatorio.");
             }
-            controlador.registrarRubro(nombre.getText().trim(), descripcion.getText().trim());
+            controlador.registrarRubroDTO(nombre.getText().trim(), descripcion.getText().trim());
             nombre.setText("");
             descripcion.setText("");
             UiUtil.mostrarInfo(this, "Rubro registrado.");

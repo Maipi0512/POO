@@ -7,6 +7,7 @@ import farmared.modelo.modulos.m1_proveedores.CertificadoNoRetencion;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
 import farmared.modelo.modulos.m1_proveedores.Rubro;
 import farmared.modelo.modulos.m3_impuestos.Impuesto;
+import farmared.dto.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -85,6 +86,37 @@ public class ProveedorController {
         if (nuevosRubros != null && !nuevosRubros.isEmpty()) p.reemplazarRubros(nuevosRubros);
     }
 
+    public void registrarProveedorDTO(String cuit, String razonSocial, String nombreFantasia,
+                                    String domicilio, String telefono, String email,
+                                    CondicionIVA condicionIVA, String ingresosBrutos,
+                                    double topeDeuda, List<RubroDTO> rubrosSeleccionados) {
+        registrarProveedor(cuit, razonSocial, nombreFantasia, domicilio, telefono, email,
+                           condicionIVA, ingresosBrutos, topeDeuda, resolveRubros(rubrosSeleccionados));
+    }
+
+    public void modificarProveedorDTO(String cuit, String razonSocial, String nombreFantasia,
+                                    String domicilio, String telefono, String email,
+                                    CondicionIVA condicionIVA, double topeDeuda,
+                                    List<RubroDTO> nuevosRubros) {
+        modificarProveedor(cuit, razonSocial, nombreFantasia, domicilio, telefono, email,
+                           condicionIVA, topeDeuda, resolveRubros(nuevosRubros));
+    }
+
+    private List<Rubro> resolveRubros(List<RubroDTO> dtos) {
+        List<Rubro> res = new ArrayList<>();
+        if (dtos != null) {
+            for (RubroDTO dto : dtos) {
+                for (Rubro r : rubros) {
+                    if (r.getIdRubro() == dto.getIdRubro()) {
+                        res.add(r);
+                        break;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
     // RF-03: Dar de baja
     public void darBajaProveedor(String cuit) {
         Proveedor p = buscarProveedorPorId(cuit);
@@ -110,6 +142,10 @@ public class ProveedorController {
         return r;
     }
 
+    public RubroDTO registrarRubroDTO(String nombre, String descripcion) {
+        return DtoMapper.toDTO(registrarRubro(nombre, descripcion));
+    }
+
     public void registrarRubro(Rubro rubro) {
         rubros.add(rubro);
         if (rubro.getIdRubro() >= contadorRubro) contadorRubro = rubro.getIdRubro() + 1;
@@ -130,14 +166,27 @@ public class ProveedorController {
         return null;
     }
 
+    public ProveedorDTO buscarProveedorDTO(String cuit) {
+        return DtoMapper.toDTO(buscarProveedorPorId(cuit));
+    }
+
     public List<Proveedor> listarProveedores() { return new ArrayList<>(proveedores); }
+    public List<ProveedorDTO> listarProveedoresDTO() { return DtoMapper.toProveedorDTOList(proveedores); }
+
     public List<Rubro>     listarRubros()       { return new ArrayList<>(rubros); }
+    public List<RubroDTO>  listarRubrosDTO()    { return DtoMapper.toRubroDTOList(rubros); }
+
     public List<Impuesto>  listarImpuestos()    { return new ArrayList<>(impuestos); }
+    public List<ImpuestoDTO> listarImpuestosDTO() { return DtoMapper.toImpuestoDTOList(impuestos); }
 
     public List<Usuario> listarSupervisores() {
         List<Usuario> sup = new ArrayList<>();
         for (Usuario u : usuarios) if (u.esAutorizador()) sup.add(u);
         return sup;
+    }
+
+    public List<UsuarioDTO> listarSupervisoresDTO() {
+        return DtoMapper.toUsuarioDTOList(listarSupervisores());
     }
 
     public boolean tieneCertificadoVigente(String cuit, TipoImpuesto tipo) {

@@ -1,8 +1,9 @@
 package farmared.vistas.paneles;
 
-import farmared.modelo.modulos.m5_comprobantes.Comprobante;
+import farmared.dto.ComprobanteDTO;
+import farmared.dto.OrdenPagoDTO;
+import farmared.dto.ProveedorDTO;
 import farmared.modelo.modulos.m6_ordenes_pago.MedioPago;
-import farmared.modelo.modulos.m6_ordenes_pago.OrdenPago;
 import farmared.vistas.observador.NotificadorSistema;
 import farmared.vistas.observador.ObservadorSistema;
 import farmared.controladores.AppContext;
@@ -28,8 +29,8 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
     private final JTable tablaOP = new JTable();
     private final JLabel lblResumen = new JLabel("Seleccione comprobantes y prepare la OP.");
 
-    private OrdenPago opEnCurso;
-    private final Map<Comprobante, Double> seleccion = new LinkedHashMap<>();
+    private OrdenPagoDTO opEnCurso;
+    private final Map<String, Double> seleccion = new LinkedHashMap<>();
 
     public PanelOrdenesPago() {
         setLayout(new BorderLayout(8, 8));
@@ -85,7 +86,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
     public void cargarDatos() {
         comboProveedores.removeAllItems();
-        for (var p : controlador.getProveedores()) {
+        for (ProveedorDTO p : controlador.getProveedoresDTO()) {
             if (p.isActivo()) {
                 comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
             }
@@ -93,10 +94,10 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
         DefaultTableModel model = (DefaultTableModel) tablaOP.getModel();
         model.setRowCount(0);
-        for (OrdenPago op : controlador.getOrdenesEmitidas()) {
+        for (OrdenPagoDTO op : controlador.getOrdenesEmitidasDTO()) {
             model.addRow(new Object[]{
                     op.getNumero(),
-                    op.getProveedor().getRazonSocial(),
+                    op.getRazonSocialProveedor(),
                     UiUtil.formatearMoneda(op.getImporteBruto()),
                     UiUtil.formatearMoneda(op.getTotalRetenciones()),
                     UiUtil.formatearMoneda(op.getImporteNeto()),
@@ -115,10 +116,10 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
         try {
             opEnCurso = null;
             seleccion.clear();
-            List<Comprobante> impagos = controlador.iniciarOrdenPago(obtenerCuitSeleccionado());
+            List<ComprobanteDTO> impagos = controlador.iniciarOrdenPagoDTO(obtenerCuitSeleccionado());
             DefaultTableModel model = (DefaultTableModel) tablaImpagos.getModel();
             model.setRowCount(0);
-            for (Comprobante c : impagos) {
+            for (ComprobanteDTO c : impagos) {
                 model.addRow(new Object[]{
                         Boolean.FALSE,
                         c.getNumero(),
@@ -138,13 +139,13 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
         try {
             seleccion.clear();
             DefaultTableModel model = (DefaultTableModel) tablaImpagos.getModel();
-            List<Comprobante> impagos = controlador.iniciarOrdenPago(obtenerCuitSeleccionado());
+            List<ComprobanteDTO> impagos = controlador.iniciarOrdenPagoDTO(obtenerCuitSeleccionado());
 
             for (int i = 0; i < model.getRowCount(); i++) {
                 Boolean marcado = (Boolean) model.getValueAt(i, 0);
                 if (Boolean.TRUE.equals(marcado) && i < impagos.size()) {
-                    Comprobante c = impagos.get(i);
-                    seleccion.put(c, c.getSaldoPendiente());
+                    ComprobanteDTO c = impagos.get(i);
+                    seleccion.put(c.getNumero(), c.getSaldoPendiente());
                 }
             }
 
@@ -152,7 +153,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
                 throw new IllegalArgumentException("Seleccione al menos un comprobante.");
             }
 
-            opEnCurso = controlador.seleccionarComprobantes(obtenerCuitSeleccionado(), seleccion, new Date());
+            opEnCurso = controlador.seleccionarComprobantesDTO(obtenerCuitSeleccionado(), seleccion, new Date());
             lblResumen.setText(String.format(
                     "OP %s | %d comprobante(s) | Bruto: %s | Retenciones: %s | Neto: %s",
                     opEnCurso.getNumero(), seleccion.size(),
@@ -179,7 +180,7 @@ public class PanelOrdenesPago extends JPanel implements ObservadorSistema {
 
         try {
             List<MedioPago> medios = dialog.getMedios();
-            controlador.confirmarPago(opEnCurso, medios);
+            controlador.confirmarPagoDTO(opEnCurso.getNumero(), medios);
             UiUtil.mostrarInfo(this, String.format(
                     "OP emitida: %s con %d medio(s) de pago",
                     opEnCurso.getNumero(), medios.size()

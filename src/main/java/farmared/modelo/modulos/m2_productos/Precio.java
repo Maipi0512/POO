@@ -8,7 +8,7 @@ public final class Precio {
     private final double monto;
 
     public Precio(double monto) {
-        if (monto < 0) throw new IllegalArgumentException("El precio no puede ser negativo.");
+        if (monto <= 0) throw new IllegalArgumentException("El precio debe ser mayor a cero.");
         this.monto = Math.round(monto * 100.0) / 100.0;
     }
 

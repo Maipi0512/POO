@@ -4,6 +4,7 @@ package farmared.vistas.util;
 
 import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
+import farmared.dto.ComprobanteDTO;
 
 import java.util.List;
 
@@ -15,6 +16,15 @@ public final class CarritoUtil {
     public static ResumenCarrito resumenComprobante(List<DetalleComprobante> detalles) {
         double neto = 0, iva = 0;
         for (DetalleComprobante d : detalles) {
+            neto += d.getSubtotal();
+            iva += d.getImporteIVA();
+        }
+        return new ResumenCarrito(detalles.size(), neto, iva);
+    }
+
+    public static ResumenCarrito resumenComprobanteDTO(List<ComprobanteDTO.DetalleComprobanteDTO> detalles) {
+        double neto = 0, iva = 0;
+        for (ComprobanteDTO.DetalleComprobanteDTO d : detalles) {
             neto += d.getSubtotal();
             iva += d.getImporteIVA();
         }

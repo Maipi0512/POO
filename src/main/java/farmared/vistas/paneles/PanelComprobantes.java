@@ -2,12 +2,12 @@ package farmared.vistas.paneles;
 
 import farmared.modelo.enums.EstadoOrdenCompra;
 import farmared.modelo.enums.TipoComprobante;
-import farmared.modelo.modulos.m2_productos.Producto;
 import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.modelo.modulos.m5_comprobantes.Comprobante;
-import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
-import farmared.modelo.modulos.m8_usuarios.Usuario;
+import farmared.dto.ProductoDTO;
+import farmared.dto.ProveedorDTO;
+import farmared.dto.ComprobanteDTO;
+import farmared.dto.UsuarioDTO;
 import farmared.vistas.observador.NotificadorSistema;
 import farmared.vistas.observador.ObservadorSistema;
 import farmared.controladores.AppContext;
@@ -28,7 +28,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
     private final JComboBox<String>        comboProveedores = new JComboBox<>();
     private final JComboBox<TipoComprobante> tipoComprobante = new JComboBox<>(TipoComprobante.values());
-    private final JComboBox<Producto>      comboProductos   = new JComboBox<>();
+    private final JComboBox<ProductoDTO>   comboProductos   = new JComboBox<>();
     private final JComboBox<OrdenCompra>   comboOC          = new JComboBox<>();
     private final JTextField cantidad = new JTextField(6);
     private final JTextField precioUnitario = new JTextField(8);
@@ -36,7 +36,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
     private final JTable tablaDetalle = new JTable();
     private final JTable tablaComprobantes = new JTable();
 
-    private final List<DetalleComprobante> detallesPendientes = new ArrayList<>();
+    private final List<ComprobanteDTO.DetalleComprobanteDTO> detallesPendientes = new ArrayList<>();
     private boolean actualizandoCombos = false;
 
     public PanelComprobantes() {
@@ -141,18 +141,18 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
     public void cargarDatos() {
         comboProveedores.removeAllItems();
-        for (var p : controlador.getProveedores()) {
+        for (ProveedorDTO p : controlador.getProveedoresDTO()) {
             comboProveedores.addItem(p.getCuit() + " - " + p.getRazonSocial());
         }
         cargarProductosProveedor();
 
         DefaultTableModel model = (DefaultTableModel) tablaComprobantes.getModel();
         model.setRowCount(0);
-        for (Comprobante c : controlador.listar()) {
+        for (ComprobanteDTO c : controlador.listarDTO()) {
             model.addRow(new Object[]{
                     c.getNumero(),
                     c.getTipo(),
-                    c.getProveedor().getRazonSocial(),
+                    c.getRazonSocialProveedor(),
                     c.getDetalles().size(),
                     UiUtil.formatearMoneda(c.getImporteNeto()),
                     UiUtil.formatearMoneda(c.getImporteTotal()),
@@ -173,15 +173,15 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         };
 
         boolean todoOk = true;
-        for (DetalleComprobante dc : detallesPendientes) {
-            String codigo = dc.getProducto().getCodigoInterno();
+        for (ComprobanteDTO.DetalleComprobanteDTO dc : detallesPendientes) {
+            String codigo = dc.getCodigoProducto();
             DetalleOC docOC = null;
             for (DetalleOC d : oc.getDetalles()) {
                 if (d.getProducto().getCodigoInterno().equals(codigo)) { docOC = d; break; }
             }
             if (docOC == null) {
                 model.addRow(new Object[]{
-                        codigo, dc.getProducto().getDescripcion(),
+                        codigo, dc.getDescripcionProducto(),
                         "-", dc.getCantidad(),
                         "-", UiUtil.formatearMoneda(dc.getPrecioUnitario()),
                         "N/A (no esta en OC)", "NO"
@@ -195,7 +195,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
                 boolean lineaOk  = precioOk && cantOk;
                 todoOk = todoOk && lineaOk;
                 model.addRow(new Object[]{
-                        codigo, dc.getProducto().getDescripcion(),
+                        codigo, dc.getDescripcionProducto(),
                         docOC.getCantidad(), dc.getCantidad(),
                         UiUtil.formatearMoneda(docOC.getPrecioUnitario()),
                         UiUtil.formatearMoneda(dc.getPrecioUnitario()),
@@ -233,19 +233,26 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         comboProductos.removeAllItems();
         if (oc == null) {
             try {
-                for (Producto p : AppContext.getInstancia().getOrdenCompraCtrl()
-                        .listarProductosPorProveedor(obtenerCuitSeleccionado())) {
+                for (ProductoDTO p : AppContext.getInstancia().getOrdenCompraCtrl()
+                        .listarProductosPorProveedorDTO(obtenerCuitSeleccionado())) {
                     comboProductos.addItem(p);
                 }
             } catch (Exception ignored) {}
         } else {
-            for (DetalleOC d : oc.getDetalles()) comboProductos.addItem(d.getProducto());
+            for (DetalleOC d : oc.getDetalles()) {
+                ProductoDTO dto = AppContext.getInstancia().getProductoCtrl()
+                        .buscarProductoDTO(d.getProducto().getCodigoInterno());
+                if (dto != null) comboProductos.addItem(dto);
+            }
             detallesPendientes.clear();
             int linea = 1;
             for (DetalleOC d : oc.getDetalles()) {
-                detallesPendientes.add(new DetalleComprobante(
-                        linea++, d.getProducto(), d.getCantidad(),
-                        d.getPrecioUnitario(), d.getProducto().getTipoIVA().getPorcentaje()
+                double alicuota = d.getProducto().getTipoIVA().getPorcentaje();
+                double subtotal = Math.round(d.getCantidad() * d.getPrecioUnitario() * 100.0) / 100.0;
+                double iva      = Math.round(subtotal * (alicuota / 100.0) * 100.0) / 100.0;
+                detallesPendientes.add(new ComprobanteDTO.DetalleComprobanteDTO(
+                        linea++, d.getProducto().getCodigoInterno(), d.getProducto().getDescripcion(),
+                        d.getCantidad(), d.getPrecioUnitario(), alicuota, subtotal, iva
                 ));
             }
             refrescarCarrito();
@@ -261,7 +268,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         comboOC.addItem(null);
         try {
             String cuit = obtenerCuitSeleccionado();
-            for (Producto p : AppContext.getInstancia().getOrdenCompraCtrl().listarProductosPorProveedor(cuit)) {
+            for (ProductoDTO p : AppContext.getInstancia().getOrdenCompraCtrl().listarProductosPorProveedorDTO(cuit)) {
                 comboProductos.addItem(p);
             }
             for (OrdenCompra oc : controlador.listarOCsPorProveedor(cuit)) {
@@ -277,7 +284,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
     }
 
     private void autocompletarPrecio() {
-        Producto prod = (Producto) comboProductos.getSelectedItem();
+        ProductoDTO prod = (ProductoDTO) comboProductos.getSelectedItem();
         if (prod == null) return;
         try {
             double precio = AppContext.getInstancia().getOrdenCompraCtrl().obtenerPrecioVigente(prod.getCodigoInterno(), obtenerCuitSeleccionado());
@@ -294,7 +301,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
     private void agregarAlCarrito() {
         try {
-            Producto producto = (Producto) comboProductos.getSelectedItem();
+            ProductoDTO producto = (ProductoDTO) comboProductos.getSelectedItem();
             if (producto == null) throw new IllegalArgumentException("Seleccione un producto del proveedor.");
 
             double cant = UiUtil.parsearDouble(cantidad.getText(), "Cantidad");
@@ -309,8 +316,12 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
             }
 
             int linea = detallesPendientes.size() + 1;
-            DetalleComprobante det = new DetalleComprobante(
-                    linea, producto, cant, precio, producto.getTipoIVA().getPorcentaje()
+            double alicuota = farmared.modelo.enums.TipoIVA.valueOf(producto.getTipoIVA()).getPorcentaje();
+            double subtotal = Math.round(cant * precio * 100.0) / 100.0;
+            double iva = Math.round(subtotal * (alicuota / 100.0) * 100.0) / 100.0;
+
+            ComprobanteDTO.DetalleComprobanteDTO det = new ComprobanteDTO.DetalleComprobanteDTO(
+                    linea, producto.getCodigoInterno(), producto.getDescripcion(), cant, precio, alicuota, subtotal, iva
             );
             detallesPendientes.add(det);
             cantidad.setText("");
@@ -332,11 +343,13 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
     }
 
     private void renumerarLineas() {
-        List<DetalleComprobante> nuevos = new ArrayList<>();
+        List<ComprobanteDTO.DetalleComprobanteDTO> nuevos = new ArrayList<>();
         int n = 1;
-        for (DetalleComprobante d : detallesPendientes) {
-            nuevos.add(new DetalleComprobante(n++, d.getProducto(), d.getCantidad(),
-                    d.getPrecioUnitario(), d.getAlicuotaIVA()));
+        for (ComprobanteDTO.DetalleComprobanteDTO d : detallesPendientes) {
+            nuevos.add(new ComprobanteDTO.DetalleComprobanteDTO(
+                    n++, d.getCodigoProducto(), d.getDescripcionProducto(), d.getCantidad(),
+                    d.getPrecioUnitario(), d.getAlicuotaIVA(), d.getSubtotal(), d.getImporteIVA()
+            ));
         }
         detallesPendientes.clear();
         detallesPendientes.addAll(nuevos);
@@ -348,7 +361,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
             return;
         }
 
-        CarritoUtil.ResumenCarrito resumen = CarritoUtil.resumenComprobante(detallesPendientes);
+        CarritoUtil.ResumenCarrito resumen = CarritoUtil.resumenComprobanteDTO(detallesPendientes);
         if (!UiUtil.confirmar(this,
                 resumen.formatearComprobante() + "\n\nRegistrar comprobante con estos datos?")) {
             return;
@@ -361,20 +374,21 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
             OrdenCompra ocSeleccionada = (OrdenCompra) comboOC.getSelectedItem();
             if (ocSeleccionada != null) ocs.add(ocSeleccionada.getNumero());
 
-            List<DetalleComprobante> copia = new ArrayList<>(detallesPendientes);
-            Usuario supervisor = null;
+            List<ComprobanteDTO.DetalleComprobanteDTO> copia = new ArrayList<>(detallesPendientes);
+            String supervisorUsername = null;
 
             boolean esFactura = tipo == TipoComprobante.FACTURA_A
                     || tipo == TipoComprobante.FACTURA_B || tipo == TipoComprobante.FACTURA_C;
 
-            if (esFactura && (ocs.isEmpty() || controlador.requiereSupervisor(cuit, copia, ocs))) {
+            if (esFactura && (ocs.isEmpty() || controlador.requiereSupervisorDTO(cuit, copia, ocs))) {
                 String motivo = ocs.isEmpty() ? "Comprobante sin OC"
                         : "Desvio de precios o impuestos respecto a la OC";
-                supervisor = solicitarSupervisor(motivo);
+                UsuarioDTO supervisor = solicitarSupervisor(motivo);
                 if (supervisor == null) return;
+                supervisorUsername = supervisor.getUsername();
             }
 
-            Comprobante comprobante = controlador.registrar(cuit, tipo, copia, ocs, supervisor,
+            ComprobanteDTO comprobante = controlador.registrarDTO(cuit, tipo, copia, ocs, supervisorUsername,
                     "Registro desde interfaz grafica");
 
             UiUtil.mostrarInfo(this, String.format(
@@ -390,14 +404,14 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         }
     }
 
-    private Usuario solicitarSupervisor(String motivo) {
+    private UsuarioDTO solicitarSupervisor(String motivo) {
         if (!UiUtil.confirmar(this, motivo + "\nDesea continuar con autorizacion?")) return null;
-        List<Usuario> supervisores = controlador.listarSupervisores();
+        List<UsuarioDTO> supervisores = controlador.listarSupervisoresDTO();
         if (supervisores.isEmpty()) {
             UiUtil.mostrarError(this, "No hay supervisores registrados.");
             return null;
         }
-        return (Usuario) JOptionPane.showInputDialog(
+        return (UsuarioDTO) JOptionPane.showInputDialog(
                 this, "Seleccione supervisor:", "Autorizacion",
                 JOptionPane.QUESTION_MESSAGE, null,
                 supervisores.toArray(), supervisores.get(0)
@@ -412,19 +426,20 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
     private void refrescarCarrito() {
         DefaultTableModel model = (DefaultTableModel) tablaDetalle.getModel();
         model.setRowCount(0);
-        for (DetalleComprobante d : detallesPendientes) {
+        for (ComprobanteDTO.DetalleComprobanteDTO d : detallesPendientes) {
+            double totalConIva = Math.round((d.getSubtotal() + d.getImporteIVA()) * 100.0) / 100.0;
             model.addRow(new Object[]{
                     d.getNroLinea(),
-                    d.getProducto().getCodigoInterno(),
-                    d.getProducto().getDescripcion(),
+                    d.getCodigoProducto(),
+                    d.getDescripcionProducto(),
                     d.getCantidad(),
                     UiUtil.formatearMoneda(d.getPrecioUnitario()),
                     d.getAlicuotaIVA() + "%",
                     UiUtil.formatearMoneda(d.getSubtotal()),
-                    UiUtil.formatearMoneda(d.getTotalConIVA())
+                    UiUtil.formatearMoneda(totalConIva)
             });
         }
-        CarritoUtil.ResumenCarrito resumen = CarritoUtil.resumenComprobante(detallesPendientes);
+        CarritoUtil.ResumenCarrito resumen = CarritoUtil.resumenComprobanteDTO(detallesPendientes);
         lblCarrito.setText(resumen.formatearComprobante());
     }
 

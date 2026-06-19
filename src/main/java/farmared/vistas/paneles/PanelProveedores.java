@@ -3,15 +3,13 @@ package farmared.vistas.paneles;
 import farmared.modelo.enums.CondicionIVA;
 import farmared.modelo.enums.TipoImpuesto;
 import farmared.modelo.modulos.m1_proveedores.CertificadoNoRetencion;
-import farmared.modelo.modulos.m1_proveedores.Proveedor;
-import farmared.modelo.modulos.m1_proveedores.Rubro;
+import farmared.dto.ProveedorDTO;
+import farmared.dto.RubroDTO;
 import farmared.vistas.observador.NotificadorSistema;
 import farmared.vistas.observador.ObservadorSistema;
 import farmared.controladores.AppContext;
 import farmared.controladores.ProveedorController;
 import farmared.vistas.util.UiUtil;
-
-
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -115,7 +113,7 @@ public class PanelProveedores extends JPanel {
         // Reconstruir checkboxes con los rubros actuales
         rubrosPanel.removeAll();
         checkboxRubros.clear();
-        for (Rubro r : controlador.listarRubros()) {
+        for (RubroDTO r : controlador.listarRubrosDTO()) {
             JCheckBox cb = new JCheckBox(r.getNombre());
             cb.putClientProperty("rubro", r);
             checkboxRubros.add(cb);
@@ -126,7 +124,7 @@ public class PanelProveedores extends JPanel {
 
         DefaultTableModel model = (DefaultTableModel) tabla.getModel();
         model.setRowCount(0);
-        for (Proveedor p : controlador.listarProveedores()) {
+        for (ProveedorDTO p : controlador.listarProveedoresDTO()) {
             model.addRow(new Object[]{
                     p.getCuit(),
                     p.getRazonSocial(),
@@ -134,7 +132,7 @@ public class PanelProveedores extends JPanel {
                     p.getCondicionIVA(),
                     p.isActivo() ? "Si" : "No",
                     UiUtil.formatearMoneda(p.getTopeMaximoDeuda()),
-                    UiUtil.formatearMoneda(p.obtenerCuentaCorriente())
+                    UiUtil.formatearMoneda(p.getDeudaVigente())
             });
         }
     }
@@ -144,7 +142,7 @@ public class PanelProveedores extends JPanel {
         if (fila < 0) return;
         String cuitSeleccionado = (String) tabla.getValueAt(fila, 0);
 
-        Proveedor prov = controlador.buscarProveedorPorId(cuitSeleccionado);
+        ProveedorDTO prov = controlador.buscarProveedorDTO(cuitSeleccionado);
         if (prov == null) return;
 
         cuit.setText(prov.getCuit());
@@ -154,21 +152,22 @@ public class PanelProveedores extends JPanel {
         domicilio.setText(prov.getDomicilioComercial());
         telefono.setText(prov.getTelefono());
         email.setText(prov.getEmail());
-        condicionIVA.setSelectedItem(prov.getCondicionIVA());
+        condicionIVA.setSelectedItem(CondicionIVA.valueOf(prov.getCondicionIVA()));
         ingresosBrutos.setText(prov.getNumeroIngresosBrutos());
         topeDeuda.setText(String.valueOf((long) prov.getTopeMaximoDeuda()));
 
+        List<RubroDTO> rubrosDelProv = prov.getRubros();
         for (JCheckBox cb : checkboxRubros) {
-            Rubro r = (Rubro) cb.getClientProperty("rubro");
-            cb.setSelected(prov.getRubros().contains(r));
+            RubroDTO r = (RubroDTO) cb.getClientProperty("rubro");
+            cb.setSelected(rubrosDelProv.stream().anyMatch(rd -> rd.getIdRubro() == r.getIdRubro()));
         }
     }
 
-    private List<Rubro> getRubrosSeleccionados() {
-        List<Rubro> seleccionados = new ArrayList<>();
+    private List<RubroDTO> getRubrosSeleccionados() {
+        List<RubroDTO> seleccionados = new ArrayList<>();
         for (JCheckBox cb : checkboxRubros) {
             if (cb.isSelected())
-                seleccionados.add((Rubro) cb.getClientProperty("rubro"));
+                seleccionados.add((RubroDTO) cb.getClientProperty("rubro"));
         }
         return seleccionados;
     }
@@ -182,7 +181,7 @@ public class PanelProveedores extends JPanel {
             double tope = topeDeuda.getText().trim().isEmpty() ? 0
                     : UiUtil.parsearDouble(topeDeuda.getText(), "Tope deuda");
 
-            controlador.registrarProveedor(
+            controlador.registrarProveedorDTO(
                     cuit.getText().trim(), razonSocial.getText().trim(), nombreFantasia.getText().trim(),
                     domicilio.getText().trim(), telefono.getText().trim(), email.getText().trim(),
                     (CondicionIVA) condicionIVA.getSelectedItem(), ingresosBrutos.getText().trim(),
@@ -202,7 +201,7 @@ public class PanelProveedores extends JPanel {
             double tope = topeDeuda.getText().trim().isEmpty() ? 0
                     : UiUtil.parsearDouble(topeDeuda.getText(), "Tope deuda");
 
-            controlador.modificarProveedor(
+            controlador.modificarProveedorDTO(
                     cuit.getText().trim(), razonSocial.getText().trim(), nombreFantasia.getText().trim(),
                     domicilio.getText().trim(), telefono.getText().trim(), email.getText().trim(),
                     (CondicionIVA) condicionIVA.getSelectedItem(), tope,

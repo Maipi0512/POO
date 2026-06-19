@@ -13,6 +13,7 @@ import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
 import farmared.modelo.modulos.m5_comprobantes.Factura;
 import farmared.modelo.modulos.m5_comprobantes.NotaCredito;
 import farmared.modelo.modulos.m5_comprobantes.NotaDebito;
+import farmared.dto.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,6 +66,36 @@ public class FacturaController {
         if (tipo == TipoComprobante.NOTA_DEBITO)
             return registrarNotaDebito(null, hoy, hoy, detalles, cuit);
         return registrarFactura(null, tipo, hoy, hoy, detalles, cuit, ocs, supervisor, motivo);
+    }
+
+    public ComprobanteDTO registrarDTO(String cuit, TipoComprobante tipo,
+                                       List<ComprobanteDTO.DetalleComprobanteDTO> detalles,
+                                       List<String> ocs, String supervisorUsername, String motivo) {
+        List<DetalleComprobante> resolvedDetalles = new ArrayList<>();
+        for (var d : detalles) {
+            farmared.modelo.modulos.m2_productos.Producto prod = null;
+            for (farmared.modelo.modulos.m2_productos.Producto p : AppContext.getInstancia().getProductoCtrl().listarTodos()) {
+                if (p.getCodigoInterno().equals(d.getCodigoProducto())) {
+                    prod = p;
+                    break;
+                }
+            }
+            if (prod == null) throw new IllegalArgumentException("Producto no encontrado: " + d.getCodigoProducto());
+            resolvedDetalles.add(new DetalleComprobante(d.getNroLinea(), prod, d.getCantidad(), d.getPrecioUnitario(), d.getAlicuotaIVA()));
+        }
+
+        Usuario supervisor = null;
+        if (supervisorUsername != null && !supervisorUsername.isBlank()) {
+            for (Usuario u : usuarios) {
+                if (u.getUsername().equals(supervisorUsername)) {
+                    supervisor = u;
+                    break;
+                }
+            }
+        }
+
+        Comprobante comp = registrar(cuit, tipo, resolvedDetalles, ocs, supervisor, motivo);
+        return DtoMapper.toDTO(comp);
     }
 
     public Factura registrarFactura(String numero, TipoComprobante tipo,
@@ -152,6 +183,22 @@ public class FacturaController {
         return !validarPrecios(detalles, oc.getDetalles()) || !validarImpuestos(detalles);
     }
 
+    public boolean requiereSupervisorDTO(String cuit, List<ComprobanteDTO.DetalleComprobanteDTO> detalles, List<String> ocs) {
+        List<DetalleComprobante> resolvedDetalles = new ArrayList<>();
+        for (var d : detalles) {
+            farmared.modelo.modulos.m2_productos.Producto prod = null;
+            for (farmared.modelo.modulos.m2_productos.Producto p : AppContext.getInstancia().getProductoCtrl().listarTodos()) {
+                if (p.getCodigoInterno().equals(d.getCodigoProducto())) {
+                    prod = p;
+                    break;
+                }
+            }
+            if (prod == null) throw new IllegalArgumentException("Producto no encontrado: " + d.getCodigoProducto());
+            resolvedDetalles.add(new DetalleComprobante(d.getNroLinea(), prod, d.getCantidad(), d.getPrecioUnitario(), d.getAlicuotaIVA()));
+        }
+        return requiereSupervisor(cuit, resolvedDetalles, ocs);
+    }
+
     public boolean validarProductos(List<DetalleComprobante> factura, List<DetalleOC> oc) {
         for (DetalleComprobante df : factura) {
             boolean ok = false;
@@ -232,12 +279,19 @@ public class FacturaController {
     }
 
     public List<Comprobante> listar() { return new ArrayList<>(comprobantes); }
+    public List<ComprobanteDTO> listarDTO() { return DtoMapper.toComprobanteDTOList(comprobantes); }
+
     public List<Proveedor> getProveedores() { return new ArrayList<>(proveedores); }
+    public List<ProveedorDTO> getProveedoresDTO() { return DtoMapper.toProveedorDTOList(proveedores); }
 
     public List<Usuario> listarSupervisores() {
         List<Usuario> sup = new ArrayList<>();
         for (Usuario u : usuarios) if (u.esAutorizador()) sup.add(u);
         return sup;
+    }
+
+    public List<UsuarioDTO> listarSupervisoresDTO() {
+        return DtoMapper.toUsuarioDTOList(listarSupervisores());
     }
 
     public List<OrdenCompra> listarOCsPorProveedor(String cuit) {
@@ -247,6 +301,10 @@ public class FacturaController {
         return resultado;
     }
 
+    public List<OrdenCompraDTO> listarOCsPorProveedorDTO(String cuit) {
+        return DtoMapper.toOrdenCompraDTOList(listarOCsPorProveedor(cuit));
+    }
+
     public List<Comprobante> listarPorProveedor(String cuit) {
         List<Comprobante> resultado = new ArrayList<>();
         for (Comprobante c : comprobantes)
@@ -254,5 +312,9 @@ public class FacturaController {
                     && c.getEstado() != EstadoComprobante.ANULADO)
                 resultado.add(c);
         return resultado;
+    }
+
+    public List<ComprobanteDTO> listarPorProveedorDTO(String cuit) {
+        return DtoMapper.toComprobanteDTOList(listarPorProveedor(cuit));
     }
 }

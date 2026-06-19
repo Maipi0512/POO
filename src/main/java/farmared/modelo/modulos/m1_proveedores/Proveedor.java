@@ -38,10 +38,17 @@ public class Proveedor {
                      String domicilioComercial, String telefono, String email,
                      CondicionIVA condicionIVA, String numeroIngresosBrutos,
                      Date fechaInicioActividades) {
-        this.cuit = cuit;
-        this.razonSocial = razonSocial;
-        this.nombreFantasia = nombreFantasia;
-        this.domicilioComercial = domicilioComercial;
+       new CUIT(cuit);
+        if (razonSocial == null || razonSocial.isBlank()) {
+            throw new IllegalArgumentException("La razon social no puede ser vacia.");
+        }
+        if (domicilioComercial == null || domicilioComercial.isBlank()) {
+            throw new IllegalArgumentException("El domicilio comercial no puede ser vacio.");
+        }
+        this.cuit = cuit.trim();
+        this.razonSocial = razonSocial.trim();
+        this.nombreFantasia = nombreFantasia != null ? nombreFantasia.trim() : "";
+        this.domicilioComercial = domicilioComercial.trim();
         this.telefono = telefono;
         this.email = email;
         this.condicionIVA = condicionIVA;
@@ -152,9 +159,15 @@ public class Proveedor {
     public List<Comprobante> getComprobantes()      { return new ArrayList<>(comprobantes); }
     public List<CertificadoNoRetencion> getCertificados() { return new ArrayList<>(certificados); }
 
-    public void setRazonSocial(String v)        { razonSocial = v; }
-    public void setNombreFantasia(String v)     { nombreFantasia = v; }
-    public void setDomicilioComercial(String v) { domicilioComercial = v; }
+    public void setRazonSocial(String v) {
+        if (v == null || v.isBlank()) throw new IllegalArgumentException("La razon social no puede ser vacia.");
+        razonSocial = v.trim();
+    }
+    public void setNombreFantasia(String v)     { nombreFantasia = v != null ? v.trim() : ""; }
+    public void setDomicilioComercial(String v) {
+        if (v == null || v.isBlank()) throw new IllegalArgumentException("El domicilio comercial no puede ser vacio.");
+        domicilioComercial = v.trim();
+    }
     public void setTelefono(String v)           { telefono = v; }
     public void setEmail(String v)              { email = v; }
     public void setCondicionIVA(CondicionIVA v) { condicionIVA = v; }

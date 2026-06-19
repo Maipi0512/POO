@@ -12,17 +12,27 @@ public class Rubro {
     private String descripcion;
 
     public Rubro(int idRubro, String nombre, String descripcion) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre del rubro no puede ser vacio.");
+        }
         this.idRubro = idRubro;
-        this.nombre = nombre;
-        this.descripcion = descripcion;
+        this.nombre = nombre.trim();
+        this.descripcion = descripcion != null ? descripcion.trim() : "";
     }
 
     public int getIdRubro()        { return idRubro; }
     public String getNombre()      { return nombre; }
     public String getDescripcion() { return descripcion; }
 
-    public void setNombre(String nombre)           { this.nombre = nombre; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public void setNombre(String nombre) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre del rubro no puede ser vacio.");
+        }
+        this.nombre = nombre.trim();
+    }
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion != null ? descripcion.trim() : "";
+    }
 
     @Override
     public boolean equals(Object o) {
