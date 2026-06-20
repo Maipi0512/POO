@@ -21,7 +21,8 @@ public class TransferenciaBancaria extends MedioPago {
     public boolean procesarPago() {
         return cbuOrigen != null && !cbuOrigen.isBlank()
             && cbuDestino != null && !cbuDestino.isBlank()
-            && numeroOperacion != null && !numeroOperacion.isBlank();
+            && numeroOperacion != null && !numeroOperacion.isBlank()
+            && getImporte() > 0;
     }
 
     @Override

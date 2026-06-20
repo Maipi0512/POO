@@ -178,9 +178,15 @@ public class FacturaController {
     /** Retorna true si el comprobante requiere autorización de supervisor. */
     public boolean requiereSupervisor(String cuit, List<DetalleComprobante> detalles, List<String> ocs) {
         if (ocs == null || ocs.isEmpty()) return true;
-        OrdenCompra oc = buscarOrdenCompraPorNumero(ocs.get(0));
-        if (oc == null) return true;
-        return !validarPrecios(detalles, oc.getDetalles()) || !validarImpuestos(detalles);
+        List<DetalleOC> todosDetallesOC = new ArrayList<>();
+        for (String nroOC : ocs) {
+            OrdenCompra oc = buscarOrdenCompraPorNumero(nroOC);
+            if (oc != null) todosDetallesOC.addAll(oc.getDetalles());
+        }
+        if (todosDetallesOC.isEmpty()) return true;
+        return !validarProductos(detalles, todosDetallesOC)
+            || !validarPrecios(detalles, todosDetallesOC)
+            || !validarImpuestos(detalles);
     }
 
     public boolean requiereSupervisorDTO(String cuit, List<ComprobanteDTO.DetalleComprobanteDTO> detalles, List<String> ocs) {

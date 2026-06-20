@@ -17,7 +17,8 @@ public class NotaCredito extends Comprobante {
 
     @Override
     public double afectarCuentaCorriente() {
-        if (estado == EstadoComprobante.ANULADO) return 0.0;
+        if (estado == EstadoComprobante.ANULADO
+                || estado == EstadoComprobante.PAGADO_TOTAL) return 0.0;
         return -saldoPendiente;   // negativo
     }
 

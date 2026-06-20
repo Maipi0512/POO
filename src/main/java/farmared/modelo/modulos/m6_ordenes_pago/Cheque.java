@@ -31,7 +31,8 @@ public abstract class Cheque extends MedioPago {
             && fechaEmisionCheque != null
             && fechaVencimiento != null
             && firmante != null && !firmante.isBlank()
-            && !fechaVencimiento.before(fechaEmisionCheque);
+            && !fechaVencimiento.before(fechaEmisionCheque)
+            && getImporte() > 0;
     }
 
     public String getNumeroCheque()     { return numero; }

@@ -10,7 +10,7 @@ public class Efectivo extends MedioPago {
     }
 
     @Override
-    public boolean procesarPago() { return true; }
+    public boolean procesarPago() { return getImporte() > 0; }
 
     @Override
     public String obtenerDescripcion() { return "Efectivo"; }
