@@ -1,10 +1,12 @@
 package farmared.vistas;
 
+import farmared.controladores.FacturaController;
 import farmared.controladores.ProductoController;
 import farmared.controladores.ProveedorController;
 import farmared.controladores.UsuarioController;
 import farmared.modelo.enums.CondicionIVA;
 import farmared.modelo.enums.RolUsuario;
+import farmared.modelo.enums.TipoComprobante;
 import farmared.modelo.enums.TipoIVA;
 import farmared.modelo.modulos.m1_proveedores.Proveedor;
 import farmared.modelo.modulos.m1_proveedores.Rubro;
@@ -14,9 +16,12 @@ import farmared.modelo.modulos.m3_impuestos.EscalaRetencion;
 import farmared.modelo.modulos.m3_impuestos.ImpuestoGanancias;
 import farmared.modelo.modulos.m3_impuestos.ImpuestoIngresosBrutos;
 import farmared.modelo.modulos.m3_impuestos.ImpuestoIVA;
+import farmared.modelo.modulos.m5_comprobantes.DetalleComprobante;
 import farmared.modelo.modulos.m8_usuarios.Usuario;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Carga datos de ejemplo usando los controladores directamente.
@@ -47,7 +52,8 @@ public final class DatosIniciales {
 
         UsuarioController uc = UsuarioController.getInstance();
         uc.registrarUsuario(new Usuario(1, "Ana",    "Lopez", "alopez", "pass",  RolUsuario.OPERADOR));
-        uc.registrarUsuario(new Usuario(2, "Carlos", "Rios",  "crios",  "pass",  RolUsuario.SUPERVISOR));
+        Usuario supervisor = new Usuario(2, "Carlos", "Rios", "crios", "pass", RolUsuario.SUPERVISOR);
+        uc.registrarUsuario(supervisor);
         uc.registrarUsuario(new Usuario(3, "Maria",  "Gomez", "mgomez", "admin", RolUsuario.ADMINISTRADOR));
 
         Date hoy = new Date();
@@ -103,6 +109,24 @@ public final class DatosIniciales {
                 "unidad", TipoIVA.IVA_10_5, rubEquipamiento);
         termometro.agregarPrecioAcordado(new PrecioAcordado(28000.0, hoy, null, medEquip));
         prodCtrl.registrarProducto(termometro);
+
+        FacturaController fc = FacturaController.getInstance();
+        List<DetalleComprobante> det1 = new ArrayList<>();
+        det1.add(new DetalleComprobante(1, ibuprofeno,  10, 150.0, 21.0));
+        det1.add(new DetalleComprobante(2, paracetamol,  5,  95.0, 21.0));
+        fc.registrarFactura(null, TipoComprobante.FACTURA_A, hoy, hoy, det1,
+                "20-12345678-9", new ArrayList<>(), supervisor, "Compra directa");
+
+        List<DetalleComprobante> det2 = new ArrayList<>();
+        det2.add(new DetalleComprobante(1, alcohol,    3, 1200.0, 21.0));
+        det2.add(new DetalleComprobante(2, detergente, 2, 3500.0, 21.0));
+        fc.registrarFactura(null, TipoComprobante.FACTURA_C, hoy, hoy, det2,
+                "27-11223344-5", new ArrayList<>(), supervisor, "Compra directa");
+
+        List<DetalleComprobante> det3 = new ArrayList<>();
+        det3.add(new DetalleComprobante(1, tensiometro, 1, 45000.0, 10.5));
+        fc.registrarFactura(null, TipoComprobante.FACTURA_A, hoy, hoy, det3,
+                "30-55667788-9", new ArrayList<>(), supervisor, "Compra directa");
     }
 
     private static void cargarProv(Proveedor prov) {
