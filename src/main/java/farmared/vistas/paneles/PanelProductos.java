@@ -3,7 +3,6 @@ package farmared.vistas.paneles;
 import farmared.modelo.enums.TipoIVA;
 import farmared.dto.ProveedorDTO;
 import farmared.dto.RubroDTO;
-import farmared.dto.PrecioAcordadoDTO;
 import farmared.dto.ProductoDTO;
 import farmared.controladores.AppContext;
 import farmared.controladores.ProductoController;
@@ -54,25 +53,22 @@ public class PanelProductos extends JPanel {
         agregarCampo(form, gbc, y++, "Precio acordado:", precio);
 
         JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton nuevo            = new JButton("Nuevo");
-        JButton registrar        = new JButton("Registrar");
-        JButton agregarPrecio    = new JButton("Agregar precio");
-        JButton baja             = new JButton("Dar de baja");
-        JButton verPrecioAcord   = new JButton("Ver precio acordado");
-        JButton refrescar        = new JButton("Refrescar");
+        JButton nuevo         = new JButton("Nuevo");
+        JButton registrar     = new JButton("Registrar");
+        JButton agregarPrecio = new JButton("Agregar precio");
+        JButton baja          = new JButton("Dar de baja");
+        JButton refrescar     = new JButton("Refrescar");
         acciones.add(nuevo);
         acciones.add(registrar);
         acciones.add(agregarPrecio);
         acciones.add(baja);
-        acciones.add(verPrecioAcord);
         acciones.add(refrescar);
 
-        nuevo.addActionListener(e          -> limpiarFormulario());
-        registrar.addActionListener(e      -> registrarProducto());
-        agregarPrecio.addActionListener(e  -> agregarPrecioExistente());
-        baja.addActionListener(e           -> darBajaProducto());
-        verPrecioAcord.addActionListener(e -> verPrecioAcordado());
-        refrescar.addActionListener(e      -> cargarDatos());
+        nuevo.addActionListener(e         -> limpiarFormulario());
+        registrar.addActionListener(e     -> registrarProducto());
+        agregarPrecio.addActionListener(e -> agregarPrecioExistente());
+        baja.addActionListener(e          -> darBajaProducto());
+        refrescar.addActionListener(e     -> cargarDatos());
 
         tabla.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) cargarSeleccion();
@@ -211,30 +207,4 @@ public class PanelProductos extends JPanel {
         } catch (Exception ex) { UiUtil.mostrarError(this, ex.getMessage()); }
     }
 
-    private void verPrecioAcordado() {
-        int fila = tabla.getSelectedRow();
-        if (fila < 0) { UiUtil.mostrarError(this, "Seleccione un producto."); return; }
-        String cod = (String) tabla.getValueAt(fila, 0);
-
-        DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Proveedor", "Precio", "Desde", "Vigente"}, 0
-        ) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-
-        for (PrecioAcordadoDTO pa : prodCtrl.consultarCompulsaPreciosDTO(cod)) {
-            model.addRow(new Object[]{
-                    pa.getRazonSocialProveedor(),
-                    UiUtil.formatearMoneda(pa.getPrecioUnitario()),
-                    UiUtil.formatearFecha(pa.getFechaAcuerdo()),
-                    pa.isVigente() ? "Si" : "No"
-            });
-        }
-
-        JTable tablaPrecios = new JTable(model);
-        JScrollPane scroll = new JScrollPane(tablaPrecios);
-        scroll.setPreferredSize(new Dimension(480, 180));
-        JOptionPane.showMessageDialog(this, scroll,
-                "Precios acordados — " + cod, JOptionPane.INFORMATION_MESSAGE);
-    }
 }

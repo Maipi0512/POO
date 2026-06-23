@@ -13,7 +13,9 @@ import farmared.vistas.util.UiUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ public class PanelConsultas extends JPanel {
 
     private final JComboBox<String> comboProveedores = new JComboBox<>();
     private final JTextField codigoProducto = new JTextField(10);
+    private final JSpinner spinnerFecha = new JSpinner(new SpinnerDateModel(new Date(), null, null, Calendar.DAY_OF_MONTH));
     private final JTable tabla = new JTable();
     private final JLabel lblTitulo = new JLabel("Seleccione una consulta");
 
@@ -34,7 +37,16 @@ public class PanelConsultas extends JPanel {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         });
 
-        JPanel superior = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // --- Fila 1: filtros ---
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinnerFecha, "dd/MM/yyyy");
+        spinnerFecha.setEditor(editor);
+
+        JPanel filtros = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        filtros.add(new JLabel("Proveedor:")); filtros.add(comboProveedores);
+        filtros.add(new JLabel("Cod. Producto:")); filtros.add(codigoProducto);
+        filtros.add(new JLabel("Fecha:")); filtros.add(spinnerFecha);
+
+        // --- Fila 2: botones en grilla 2x5 ---
         JButton cuentaCorriente = new JButton("Cuenta corriente");
         JButton impagos        = new JButton("Documentos impagos");
         JButton deuda          = new JButton("Deuda por proveedor");
@@ -46,12 +58,12 @@ public class PanelConsultas extends JPanel {
         JButton ordenesCompra  = new JButton("Ordenes de compra");
         JButton ordenesPago    = new JButton("Ordenes de pago");
 
-        superior.add(new JLabel("Proveedor:")); superior.add(comboProveedores);
-        superior.add(new JLabel("Cod. Producto:")); superior.add(codigoProducto);
-        superior.add(cuentaCorriente); superior.add(impagos); superior.add(deuda);
-        superior.add(retenciones); superior.add(libroIVA); superior.add(compulsa);
-        superior.add(facturasDia); superior.add(pagos);
-        superior.add(ordenesCompra); superior.add(ordenesPago);
+        JPanel botones = new JPanel(new GridLayout(2, 5, 4, 4));
+        botones.setBorder(BorderFactory.createEmptyBorder(2, 0, 4, 0));
+        botones.add(cuentaCorriente); botones.add(impagos);    botones.add(deuda);
+        botones.add(retenciones);    botones.add(libroIVA);
+        botones.add(compulsa);       botones.add(facturasDia); botones.add(pagos);
+        botones.add(ordenesCompra);  botones.add(ordenesPago);
 
         cuentaCorriente.addActionListener(e -> consultarCuentaCorriente());
         impagos.addActionListener(e -> consultarImpagos());
@@ -64,7 +76,14 @@ public class PanelConsultas extends JPanel {
         ordenesCompra.addActionListener(e -> consultarOrdenesCompra());
         ordenesPago.addActionListener(e -> consultarOrdenesPago());
 
-        add(superior, BorderLayout.NORTH);
+        JPanel norte = new JPanel(new BorderLayout());
+        norte.add(filtros, BorderLayout.NORTH);
+        norte.add(botones, BorderLayout.CENTER);
+
+        lblTitulo.setFont(lblTitulo.getFont().deriveFont(java.awt.Font.BOLD));
+        lblTitulo.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+
+        add(norte, BorderLayout.NORTH);
         add(lblTitulo, BorderLayout.SOUTH);
         add(new JScrollPane(tabla), BorderLayout.CENTER);
 
@@ -143,7 +162,11 @@ public class PanelConsultas extends JPanel {
             Map<String, Object> l = libro.get(i);
             filas[i] = new Object[]{l.get("cuit"), l.get("razonSocial"),
                     UiUtil.formatearFecha((Date) l.get("fechaEmision")), l.get("tipo"),
-                    l.get("base21"), l.get("iva21"), l.get("base10_5"), l.get("iva10_5"), l.get("importeTotal")};
+                    UiUtil.formatearMoneda((Double) l.get("base21")),
+                    UiUtil.formatearMoneda((Double) l.get("iva21")),
+                    UiUtil.formatearMoneda((Double) l.get("base10_5")),
+                    UiUtil.formatearMoneda((Double) l.get("iva10_5")),
+                    UiUtil.formatearMoneda((Double) l.get("importeTotal"))};
         }
         setTabla("Libro IVA Compras",
                 new String[]{"CUIT", "Razon Social", "Fecha", "Tipo", "Base 21%", "IVA 21%", "Base 10.5%", "IVA 10.5%", "Total"},
@@ -155,31 +178,61 @@ public class PanelConsultas extends JPanel {
             String codigo = codigoProducto.getText().trim();
             if (codigo.isEmpty()) throw new IllegalArgumentException("Ingrese codigo de producto.");
             var precios = ctrl.consultarCompulsaPreciosDTO(codigo);
-            Object[][] filas = new Object[precios.size()][4];
+            Object[][] filas = new Object[precios.size()][6];
             for (int i = 0; i < precios.size(); i++) {
                 PrecioAcordadoDTO pa = precios.get(i);
                 filas[i] = new Object[]{pa.getRazonSocialProveedor(),
+                        pa.getRubrosProveedor(),
                         UiUtil.formatearMoneda(pa.getPrecioUnitario()),
                         UiUtil.formatearFecha(pa.getFechaAcuerdo()),
+                        UiUtil.formatearFecha(pa.getFechaVencimiento()),
                         pa.isVigente() ? "Vigente" : "Historico"};
             }
             setTabla("Compulsa de precios - " + codigo,
-                    new String[]{"Proveedor", "Precio", "Fecha acuerdo", "Estado"}, filas);
+                    new String[]{"Proveedor", "Rubro", "Precio", "Desde", "Vencimiento", "Estado"}, filas);
         } catch (Exception ex) { UiUtil.mostrarError(this, ex.getMessage()); }
     }
 
     private void consultarFacturasDia() {
         try {
-            String cuit = (comboProveedores.getSelectedItem() == null
-                    || comboProveedores.getSelectedItem().equals("")) ? null : obtenerCuitSeleccionado();
-            List<ComprobanteDTO> facturas = ctrl.consultarFacturasPorDiaDTO(new Date(), cuit);
-            Object[][] filas = new Object[facturas.size()][4];
-            for (int i = 0; i < facturas.size(); i++) {
-                ComprobanteDTO f = facturas.get(i);
-                filas[i] = new Object[]{f.getNumero(), f.getRazonSocialProveedor(),
-                        UiUtil.formatearMoneda(f.getImporteTotal()), UiUtil.formatearFecha(f.getFechaRecepcion())};
+            boolean sinFiltroProveedor = comboProveedores.getSelectedItem() == null
+                    || comboProveedores.getSelectedItem().equals("");
+            String cuit = sinFiltroProveedor ? null : obtenerCuitSeleccionado();
+            Date fechaSeleccionada = (Date) spinnerFecha.getValue();
+            List<ComprobanteDTO> facturas = ctrl.consultarFacturasPorDiaDTO(fechaSeleccionada, cuit);
+            String fechaStr = new java.text.SimpleDateFormat("dd/MM/yyyy").format(fechaSeleccionada);
+            double totalGlobal = facturas.stream().mapToDouble(ComprobanteDTO::getImporteTotal).sum();
+
+            if (sinFiltroProveedor) {
+                // Agrupar por proveedor: una fila por proveedor con cantidad y total
+                Map<String, double[]> agrupado = new LinkedHashMap<>();
+                for (ComprobanteDTO f : facturas) {
+                    agrupado.computeIfAbsent(f.getRazonSocialProveedor(), k -> new double[]{0, 0});
+                    agrupado.get(f.getRazonSocialProveedor())[0]++;
+                    agrupado.get(f.getRazonSocialProveedor())[1] += f.getImporteTotal();
+                }
+                Object[][] filas = new Object[agrupado.size()][3];
+                int i = 0;
+                for (Map.Entry<String, double[]> e : agrupado.entrySet())
+                    filas[i++] = new Object[]{e.getKey(), (int) e.getValue()[0],
+                            UiUtil.formatearMoneda(e.getValue()[1])};
+                String titulo = String.format("Facturas del %s — %d factura(s) | Total: %s",
+                        fechaStr, facturas.size(), UiUtil.formatearMoneda(totalGlobal));
+                setTabla(titulo, new String[]{"Proveedor", "Cantidad", "Total"}, filas);
+            } else {
+                // Proveedor específico: mostrar facturas individuales
+                Object[][] filas = new Object[facturas.size()][3];
+                for (int i = 0; i < facturas.size(); i++) {
+                    ComprobanteDTO f = facturas.get(i);
+                    filas[i] = new Object[]{f.getNumero(),
+                            UiUtil.formatearMoneda(f.getImporteTotal()),
+                            UiUtil.formatearFecha(f.getFechaRecepcion())};
+                }
+                String titulo = String.format("Facturas del %s — %s — %d factura(s) | Total: %s",
+                        fechaStr, facturas.isEmpty() ? "" : facturas.get(0).getRazonSocialProveedor(),
+                        facturas.size(), UiUtil.formatearMoneda(totalGlobal));
+                setTabla(titulo, new String[]{"Numero", "Importe", "Recepcion"}, filas);
             }
-            setTabla("Facturas recibidas hoy", new String[]{"Numero", "Proveedor", "Importe", "Recepcion"}, filas);
         } catch (Exception ex) { UiUtil.mostrarError(this, ex.getMessage()); }
     }
 

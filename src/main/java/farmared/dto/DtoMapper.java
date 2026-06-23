@@ -18,12 +18,22 @@ public final class DtoMapper {
 
     public static PrecioAcordadoDTO toDTO(PrecioAcordado pa) {
         if (pa == null) return null;
+        String rubros = "";
+        if (pa.getProveedor() != null) {
+            StringBuilder sb = new StringBuilder();
+            for (Rubro r : pa.getProveedor().getRubros()) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(r.getNombre());
+            }
+            rubros = sb.toString();
+        }
         return new PrecioAcordadoDTO(
                 pa.getPrecioUnitario(),
                 pa.getFechaAcuerdo(),
                 pa.getFechaFinVigencia(),
                 pa.getProveedor() != null ? pa.getProveedor().getCuit() : null,
                 pa.getProveedor() != null ? pa.getProveedor().getRazonSocial() : null,
+                rubros,
                 pa.estaVigente()
         );
     }
@@ -219,7 +229,8 @@ public final class DtoMapper {
                 u.getNombre(),
                 u.getApellido(),
                 u.getUsername(),
-                u.getRol() != null ? u.getRol().name() : null
+                u.getRol() != null ? u.getRol().name() : null,
+                u.isActivo()
         );
     }
 

@@ -54,4 +54,49 @@ public class UsuarioController {
 
     public List<Usuario> listarTodos() { return new ArrayList<>(usuarios); }
     public List<UsuarioDTO> listarTodosDTO() { return DtoMapper.toUsuarioDTOList(usuarios); }
+
+    public void darBajaUsuario(String username) {
+        Usuario target = buscarPorUsername(username);
+        if (target.getRol() == farmared.modelo.enums.RolUsuario.ADMINISTRADOR && contarAdminsActivos() <= 1) {
+            throw new IllegalStateException("No se puede dar de baja al unico administrador activo.");
+        }
+        target.setActivo(false);
+    }
+
+    public void reactivarUsuario(String username) {
+        buscarPorUsername(username).setActivo(true);
+    }
+
+    public void modificarRol(String username, farmared.modelo.enums.RolUsuario nuevoRol) {
+        Usuario target = buscarPorUsername(username);
+        if (target.getRol() == farmared.modelo.enums.RolUsuario.ADMINISTRADOR
+                && nuevoRol != farmared.modelo.enums.RolUsuario.ADMINISTRADOR
+                && contarAdminsActivos() <= 1) {
+            throw new IllegalStateException("No se puede cambiar el rol del unico administrador activo.");
+        }
+        target.setRol(nuevoRol);
+    }
+
+    public void cambiarPassword(String username, String nuevaPassword) {
+        if (nuevaPassword == null || nuevaPassword.isBlank()) {
+            throw new IllegalArgumentException("La nueva password no puede ser vacia.");
+        }
+        buscarPorUsername(username).setPassword(nuevaPassword.trim());
+    }
+
+    public int siguienteId() {
+        return usuarios.stream().mapToInt(Usuario::getIdUsuario).max().orElse(0) + 1;
+    }
+
+    private Usuario buscarPorUsername(String username) {
+        for (Usuario u : usuarios)
+            if (u.getUsername().equals(username)) return u;
+        throw new IllegalArgumentException("Usuario no encontrado: " + username);
+    }
+
+    private long contarAdminsActivos() {
+        return usuarios.stream()
+                .filter(u -> u.isActivo() && u.getRol() == farmared.modelo.enums.RolUsuario.ADMINISTRADOR)
+                .count();
+    }
 }

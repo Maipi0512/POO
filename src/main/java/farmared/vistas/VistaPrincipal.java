@@ -21,6 +21,7 @@ public class VistaPrincipal extends JFrame {
     private final PanelComprobantes panelComprobantes = new PanelComprobantes();
     private final PanelOrdenesPago panelOrdenesPago = new PanelOrdenesPago();
     private final PanelConsultas panelConsultas = new PanelConsultas();
+    private final PanelUsuarios panelUsuarios = new PanelUsuarios();
 
     public VistaPrincipal() {
         super("FarmaRed - Sistema de Gestion de Compras");
@@ -39,6 +40,10 @@ public class VistaPrincipal extends JFrame {
         pestanas.addTab("Comprobantes", panelComprobantes);
         pestanas.addTab("Ordenes de Pago", panelOrdenesPago);
         pestanas.addTab("Consultas", panelConsultas);
+
+        if (!AppContext.getInstancia().getUsuarioActual().esAutorizador()) {
+            pestanas.addTab("Usuarios", panelUsuarios);
+        }
 
         pestanas.addChangeListener(e -> refrescarPestanaActiva(pestanas));
 
@@ -66,5 +71,6 @@ public class VistaPrincipal extends JFrame {
         else if (panel instanceof PanelComprobantes) ((PanelComprobantes) panel).cargarDatos();
         else if (panel instanceof PanelOrdenesPago) ((PanelOrdenesPago) panel).cargarDatos();
         else if (panel instanceof PanelConsultas) ((PanelConsultas) panel).cargarDatos();
+        else if (panel instanceof PanelUsuarios) ((PanelUsuarios) panel).cargarDatos();
     }
 }

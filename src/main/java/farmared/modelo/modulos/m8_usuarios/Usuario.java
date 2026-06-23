@@ -55,8 +55,9 @@ public class Usuario {
     public RolUsuario getRol() { return rol; }
     public boolean isActivo()  { return activo; }
 
-    public void setActivo(boolean activo) { this.activo = activo; }
-    public void setRol(RolUsuario rol)    { this.rol = rol; }
+    public void setActivo(boolean activo)    { this.activo = activo; }
+    public void setRol(RolUsuario rol)       { this.rol = rol; }
+    public void setPassword(String password) { this.password = password; }
 
     @Override
     public String toString() {

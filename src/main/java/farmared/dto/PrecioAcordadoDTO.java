@@ -8,15 +8,18 @@ public final class PrecioAcordadoDTO {
     private final Date fechaVencimiento;
     private final String cuitProveedor;
     private final String razonSocialProveedor;
+    private final String rubrosProveedor;
     private final boolean vigente;
 
     public PrecioAcordadoDTO(double precioUnitario, Date fechaAcuerdo, Date fechaVencimiento,
-                             String cuitProveedor, String razonSocialProveedor, boolean vigente) {
+                             String cuitProveedor, String razonSocialProveedor,
+                             String rubrosProveedor, boolean vigente) {
         this.precioUnitario = precioUnitario;
         this.fechaAcuerdo = fechaAcuerdo;
         this.fechaVencimiento = fechaVencimiento;
         this.cuitProveedor = cuitProveedor;
         this.razonSocialProveedor = razonSocialProveedor;
+        this.rubrosProveedor = rubrosProveedor;
         this.vigente = vigente;
     }
 
@@ -25,5 +28,6 @@ public final class PrecioAcordadoDTO {
     public Date getFechaVencimiento() { return fechaVencimiento; }
     public String getCuitProveedor() { return cuitProveedor; }
     public String getRazonSocialProveedor() { return razonSocialProveedor; }
+    public String getRubrosProveedor() { return rubrosProveedor; }
     public boolean isVigente() { return vigente; }
 }

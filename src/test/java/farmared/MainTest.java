@@ -36,6 +36,7 @@ public class MainTest {
     private static Producto  ibuprofeno;
     private static Producto  paracetamol;
     private static Usuario   supervisor;
+    private static Usuario   admin;
 
     private static int passed = 0;
     private static int failed = 0;
@@ -104,6 +105,15 @@ public class MainTest {
         test("USER - autenticarUsuario: credenciales validas retorna usuario",    MainTest::user_autenticar_valido);
         test("USER - autenticarUsuario: credenciales invalidas retorna null",     MainTest::user_autenticar_invalido);
         test("USER - registrarUsuario: queda en lista de todos",                  MainTest::user_registrar_exitoso);
+        test("USER - darBajaUsuario: queda inactivo",                             MainTest::user_darBaja_exitoso);
+        test("USER - darBajaUsuario: inactivo no puede autenticarse",             MainTest::user_darBaja_noAutentica);
+        test("USER - darBajaUsuario: unico admin activo lanza excepcion",         MainTest::user_darBaja_unicoAdmin);
+        test("USER - reactivarUsuario: queda activo y puede autenticarse",        MainTest::user_reactivar_exitoso);
+        test("USER - modificarRol: rol actualizado correctamente",                MainTest::user_modificarRol_exitoso);
+        test("USER - modificarRol: unico admin activo lanza excepcion",           MainTest::user_modificarRol_unicoAdmin);
+        test("USER - cambiarPassword: autentica con nueva password",              MainTest::user_cambiarPassword_exitoso);
+        test("USER - cambiarPassword: password vacia lanza excepcion",            MainTest::user_cambiarPassword_vacia);
+        test("USER - siguienteId: retorna maximo+1",                              MainTest::user_siguienteId);
 
         // --- Reportes extras (RF-23 a RF-26) ---
         test("REP  - consultarDeudaVigentePorProveedor: mapa con deuda correcta", MainTest::rep_deudaVigente);
@@ -154,6 +164,8 @@ public class MainTest {
 
         supervisor = new Usuario(1, "Carlos", "Rios", "crios", "pass", RolUsuario.SUPERVISOR);
         usuarios.add(supervisor);
+        admin = new Usuario(2, "Ana", "Lopez", "alopez", "admin123", RolUsuario.ADMINISTRADOR);
+        usuarios.add(admin);
 
         impuestos.add(new ImpuestoIVA(1, 10.5, 0.0));
         impuestos.add(new ImpuestoIngresosBrutos(2, 3.0, 0.0));
@@ -669,8 +681,77 @@ public class MainTest {
         setUp();
         Usuario nuevo = new Usuario(99, "Juan", "Perez", "jperez", "1234", RolUsuario.OPERADOR);
         UsuarioController.getInstance().registrarUsuario(nuevo);
-        assertEquals(2, UsuarioController.getInstance().listarTodos().size(),
-                "Debe haber 2 usuarios registrados");
+        assertEquals(3, UsuarioController.getInstance().listarTodos().size(),
+                "Debe haber 3 usuarios registrados");
+    }
+
+    private static void user_darBaja_exitoso() {
+        setUp();
+        UsuarioController.getInstance().darBajaUsuario("crios");
+        assertTrue(!supervisor.isActivo(), "Supervisor debe quedar inactivo");
+    }
+
+    private static void user_darBaja_noAutentica() {
+        setUp();
+        UsuarioController.getInstance().darBajaUsuario("crios");
+        assertTrue(UsuarioController.getInstance().autenticarUsuario("crios", "pass") == null,
+                "Usuario inactivo no debe poder autenticarse");
+    }
+
+    private static void user_darBaja_unicoAdmin() {
+        setUp();
+        try {
+            UsuarioController.getInstance().darBajaUsuario("alopez");
+            throw new AssertionError("Debia lanzar IllegalStateException por unico admin");
+        } catch (IllegalStateException e) { /* esperado */ }
+    }
+
+    private static void user_reactivar_exitoso() {
+        setUp();
+        UsuarioController ctrl = UsuarioController.getInstance();
+        ctrl.darBajaUsuario("crios");
+        ctrl.reactivarUsuario("crios");
+        assertTrue(supervisor.isActivo(), "Supervisor debe quedar activo tras reactivacion");
+        assertNotNull(ctrl.autenticarUsuario("crios", "pass"), "Debe poder autenticarse tras reactivacion");
+    }
+
+    private static void user_modificarRol_exitoso() {
+        setUp();
+        UsuarioController ctrl = UsuarioController.getInstance();
+        // Agregar segundo admin para poder cambiar el rol del primero
+        ctrl.registrarUsuario(new Usuario(3, "Otro", "Admin", "oadmin", "pass", RolUsuario.ADMINISTRADOR));
+        ctrl.modificarRol("alopez", RolUsuario.SUPERVISOR);
+        assertEquals(RolUsuario.SUPERVISOR, admin.getRol(), "Rol debe haberse cambiado a SUPERVISOR");
+    }
+
+    private static void user_modificarRol_unicoAdmin() {
+        setUp();
+        try {
+            UsuarioController.getInstance().modificarRol("alopez", RolUsuario.OPERADOR);
+            throw new AssertionError("Debia lanzar IllegalStateException por unico admin");
+        } catch (IllegalStateException e) { /* esperado */ }
+    }
+
+    private static void user_cambiarPassword_exitoso() {
+        setUp();
+        UsuarioController ctrl = UsuarioController.getInstance();
+        ctrl.cambiarPassword("crios", "nuevapass");
+        assertNotNull(ctrl.autenticarUsuario("crios", "nuevapass"), "Debe autenticar con nueva password");
+        assertTrue(ctrl.autenticarUsuario("crios", "pass") == null, "No debe autenticar con password vieja");
+    }
+
+    private static void user_cambiarPassword_vacia() {
+        setUp();
+        try {
+            UsuarioController.getInstance().cambiarPassword("crios", "");
+            throw new AssertionError("Debia lanzar IllegalArgumentException por password vacia");
+        } catch (IllegalArgumentException e) { /* esperado */ }
+    }
+
+    private static void user_siguienteId() {
+        setUp();
+        // setUp tiene IDs 1 (supervisor) y 2 (admin), siguienteId debe ser 3
+        assertEquals(3, UsuarioController.getInstance().siguienteId(), "Siguiente ID debe ser 3");
     }
 
     // =========================================================================

@@ -31,7 +31,13 @@
       "Bash(grep -rn *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(find /home/maipi0512/Escritorio/POO -type f \\\\\\( -name \"*.uxf\" -o -name \"*.mdj\" -o -name \"*.vpp\" -o -name \"*.drawio\" -o -name \"*.xml\" \\\\\\) 2>/dev/null | head -10 *)",
+      "Read(//home/maipi0512/Escritorio/POO/**)",
+      "Bash(git restore *)",
+      "Bash(xargs cat)",
+      "Bash(mvn exec:java -Dexec.mainClass=\"farmared.MainTest\")",
+      "Bash(java -cp target/test-classes:target/classes farmared.MainTest)"
     ],
     "additionalDirectories": [
       "/home/maipi0512/Escritorio/POO/POO"
