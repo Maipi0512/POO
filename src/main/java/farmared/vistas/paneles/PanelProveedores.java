@@ -5,8 +5,6 @@ import farmared.modelo.enums.TipoImpuesto;
 import farmared.modelo.modulos.m1_proveedores.CertificadoNoRetencion;
 import farmared.dto.ProveedorDTO;
 import farmared.dto.RubroDTO;
-import farmared.vistas.observador.NotificadorSistema;
-import farmared.vistas.observador.ObservadorSistema;
 import farmared.controladores.AppContext;
 import farmared.controladores.ProveedorController;
 import farmared.vistas.util.UiUtil;

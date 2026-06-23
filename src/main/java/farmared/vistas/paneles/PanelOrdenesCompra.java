@@ -7,7 +7,6 @@ import farmared.dto.UsuarioDTO;
 import farmared.dto.ItemCarritoDTO;
 import farmared.controladores.AppContext;
 import farmared.controladores.OrdenCompraController;
-import farmared.vistas.util.CarritoUtil;
 import farmared.vistas.util.UiUtil;
 
 import javax.swing.*;

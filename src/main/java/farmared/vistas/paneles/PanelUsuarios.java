@@ -44,8 +44,12 @@ public class PanelUsuarios extends JPanel {
             if (!e.getValueIsAdjusting()) cargarSeleccion();
         });
 
+        boolean esAdmin = AppContext.getInstancia().getUsuarioActual().esAdministrador();
+
         add(new JScrollPane(tabla), BorderLayout.CENTER);
-        add(construirFormulario(), BorderLayout.EAST);
+        if (esAdmin) {
+            add(construirFormulario(), BorderLayout.EAST);
+        }
 
         btnNuevo.addActionListener(e -> limpiarFormulario());
         btnRegistrar.addActionListener(e -> registrar());
@@ -54,7 +58,6 @@ public class PanelUsuarios extends JPanel {
         btnReactivar.addActionListener(e -> reactivar());
         btnBaja.addActionListener(e -> darBaja());
 
-        boolean esAdmin = AppContext.getInstancia().getUsuarioActual().esAdministrador();
         btnModRol.setEnabled(esAdmin);
         btnCambiarPass.setEnabled(esAdmin);
         btnReactivar.setEnabled(esAdmin);
