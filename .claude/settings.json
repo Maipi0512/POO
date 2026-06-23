@@ -37,7 +37,9 @@
       "Bash(git restore *)",
       "Bash(xargs cat)",
       "Bash(mvn exec:java -Dexec.mainClass=\"farmared.MainTest\")",
-      "Bash(java -cp target/test-classes:target/classes farmared.MainTest)"
+      "Bash(java -cp target/test-classes:target/classes farmared.MainTest)",
+      "Bash(java -version)",
+      "Read(//usr/lib/jvm/**)"
     ],
     "additionalDirectories": [
       "/home/maipi0512/Escritorio/POO/POO"

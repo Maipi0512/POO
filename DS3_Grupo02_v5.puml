@@ -1,22 +1,20 @@
 @startuml DS3_RegistrarFactura
 title DS3 - Registrar Factura
 
-autonumber
-
 actor Operador
 participant "FacturaController" as Ctrl
 participant "Proveedor" as Proveedor
 participant "Factura" as Factura
-participant "DetalleComprobante" as DetalleComp
 participant "OrdenCompra" as OrdenCompra
 
+' ---- registrarFactura ----
 Operador -> Ctrl : registrarFactura(numero, tipo, fechaEmision, fechaRecepcion,\ndatos: List<DetalleComprobante>, cuitProveedor, nrosOC: List<String>,\nsupervisor, motivo)
 activate Ctrl
     note right of Ctrl
         Ctrl = FacturaController.getInstance()
     end note
 
-    loop [buscar en colección de proveedores]
+    loop [buscar en coleccion de proveedores]
         Ctrl -> Ctrl : buscarProveedorPorId(cuitProveedor)
         activate Ctrl
             Ctrl --> Ctrl : unProveedor
@@ -29,47 +27,48 @@ activate Ctrl
         Factura --> Ctrl : unaFactura
     deactivate Factura
 
-    loop [por cada item en datos]
-        create DetalleComp
-        Ctrl -> DetalleComp : new DetalleComprobante(nroLinea, producto, cantidad, precioUnitario, alicuotaIVA)
-        activate DetalleComp
-            DetalleComp --> Ctrl : unDetalleComp
-        deactivate DetalleComp
-        Ctrl -> Factura : agregarDetalle(unDetalleComp)
+    loop [por cada detalle en datos]
+        Ctrl -> Factura : agregarDetalle(detalle)
         activate Factura
             Factura --> Ctrl : ok
         deactivate Factura
     end
 
-    Ctrl -> Factura : getDetalles()
-    activate Factura
-        Factura --> Ctrl : detallesFactura
-    deactivate Factura
-
     loop [por cada nroOC en nrosOC]
-        loop [buscar en colección de órdenes de compra]
+        loop [buscar en coleccion de ordenes de compra]
             Ctrl -> Ctrl : buscarOrdenCompraPorNumero(nroOC)
             activate Ctrl
                 Ctrl --> Ctrl : unaOrdenCompra
             deactivate Ctrl
         end
+        Ctrl -> Factura : asociarOrdenCompra(unaOrdenCompra)
+        activate Factura
+            Factura --> Ctrl : ok
+        deactivate Factura
         Ctrl -> OrdenCompra : getDetalles()
         activate OrdenCompra
-            OrdenCompra --> Ctrl : detallesOC_parciales
+            OrdenCompra --> Ctrl : detallesOC
         deactivate OrdenCompra
     end
 
     note right of Ctrl
-        El controlador acumula todos los
-        detallesOC_parciales en "detallesOCTotales"
+        Si detallesOC no esta vacio,
+        valida coincidencia con la factura.
+        Si hay desvio o no hay OC,
+        requiere supervisor autorizado.
     end note
 
-    Ctrl -> Ctrl : validarProductos(detallesFactura, detallesOCTotales)
+    Ctrl -> Ctrl : validarProductos(factura.getDetalles(), detallesOC)
     activate Ctrl
         Ctrl --> Ctrl : true
     deactivate Ctrl
 
-    Ctrl -> Ctrl : validarPrecios(detallesFactura, detallesOCTotales)
+    Ctrl -> Ctrl : validarPrecios(factura.getDetalles(), detallesOC)
+    activate Ctrl
+        Ctrl --> Ctrl : true
+    deactivate Ctrl
+
+    Ctrl -> Ctrl : validarImpuestos(factura.getDetalles())
     activate Ctrl
         Ctrl --> Ctrl : true
     deactivate Ctrl
@@ -77,8 +76,8 @@ activate Ctrl
     Ctrl -> Factura : calcularImpuestos()
     activate Factura
         note right of Factura
-            Calcula y actualiza importeIVA
-            e importeTotal internamente (void)
+            Calcula importeIVA e importeTotal
+            a partir de los DetalleComprobante
         end note
         Factura --> Ctrl : ok
     deactivate Factura
@@ -88,12 +87,16 @@ activate Ctrl
         Factura --> Ctrl : deltaDeuda : double
     deactivate Factura
 
+    Ctrl -> Proveedor : agregarComprobante(unaFactura)
+    activate Proveedor
+        Proveedor --> Ctrl : ok
+    deactivate Proveedor
+
     Ctrl -> Proveedor : actualizarDeuda(deltaDeuda)
     activate Proveedor
         note right of Proveedor
-            afectarCuentaCorriente() devuelve
-            el delta positivo (Factura/NotaDebito)
-            o negativo (NotaCredito) sobre la deuda
+            La deuda se recalcula dinamicamente
+            en obtenerCuentaCorriente()
         end note
         Proveedor --> Ctrl : ok
     deactivate Proveedor
@@ -103,9 +106,9 @@ activate Ctrl
         activate OrdenCompra
             note right of OrdenCompra
                 Estado pasa a PARCIALMENTE_FACTURADA
-                o FACTURADA según cobertura
+                o FACTURADA segun cobertura
             end note
-            OrdenCompra --> Ctrl : estadoActualizado
+            OrdenCompra --> Ctrl : ok
         deactivate OrdenCompra
     end
 

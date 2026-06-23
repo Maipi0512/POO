@@ -1,14 +1,9 @@
 @startuml DS4_ObtenerCuentaCorriente
 title DS4 - Obtener Cuenta Corriente del Proveedor
 
-autonumber
-
 actor Operador
 participant "ReportesController" as Ctrl
 participant "Proveedor" as Proveedor
-participant "Comprobante" as Comprobante
-participant "OrdenPago" as OrdenPago
-participant "CancelacionComprobante" as Cancelacion
 
 Operador -> Ctrl : consultarCuentaCorriente(cuitProveedor)
 activate Ctrl
@@ -16,7 +11,7 @@ activate Ctrl
         Ctrl = ReportesController.getInstance()
     end note
 
-    loop [buscar en colección de proveedores]
+    loop [buscar en coleccion de proveedores]
         Ctrl -> Ctrl : buscarProveedorPorId(cuitProveedor)
         activate Ctrl
             Ctrl --> Ctrl : unProveedor
@@ -26,9 +21,8 @@ activate Ctrl
     Ctrl -> Proveedor : obtenerCuentaCorriente()
     activate Proveedor
         note right of Proveedor
-            Delega a calcularDeudaVigente():
-            suma afectarCuentaCorriente()
-            de cada comprobante
+            Suma afectarCuentaCorriente()
+            de cada comprobante del proveedor
         end note
         Proveedor --> Ctrl : deudaVigente : double
     deactivate Proveedor
@@ -38,44 +32,7 @@ activate Ctrl
         Proveedor --> Ctrl : comprobantes : List<Comprobante>
     deactivate Proveedor
 
-    loop [por cada Comprobante en comprobantes]
-        Ctrl -> Comprobante : esSumaDeuda()
-        activate Comprobante
-            Comprobante --> Ctrl : true/false
-        deactivate Comprobante
-        Ctrl -> Comprobante : getDetalles()
-        activate Comprobante
-            Comprobante --> Ctrl : detalles
-        deactivate Comprobante
-    end
-
-    loop [buscar en colección de órdenes de pago]
-        Ctrl -> Ctrl : buscarPagosPorProveedor(cuitProveedor: String)
-        activate Ctrl
-            Ctrl --> Ctrl : historialPagos
-        deactivate Ctrl
-    end
-
-    loop [por cada OrdenPago en historialPagos]
-        Ctrl -> OrdenPago : obtenerCancelaciones()
-        activate OrdenPago
-            OrdenPago --> Ctrl : listaCancelaciones
-        deactivate OrdenPago
-
-        loop [por cada Cancelacion en listaCancelaciones]
-            Ctrl -> Cancelacion : getComprobante()
-            activate Cancelacion
-                Cancelacion --> Ctrl : comprobanteCancelado
-            deactivate Cancelacion
-
-            Ctrl -> Cancelacion : getImporteCancelado()
-            activate Cancelacion
-                Cancelacion --> Ctrl : importeCancelado
-            deactivate Cancelacion
-        end
-    end
-
-    Ctrl --> Operador : Cuenta Corriente detallada
+    Ctrl --> Operador : comprobantes : List<Comprobante>
 deactivate Ctrl
 
 @enduml

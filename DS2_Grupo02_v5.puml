@@ -19,7 +19,7 @@ activate Ctrl
     note right of Ctrl
         Ctrl = OrdenPagoController.getInstance()
     end note
-    loop [buscar en colección de proveedores]
+    loop [buscar en coleccion de proveedores]
         Ctrl -> Ctrl : buscarProveedorPorId(cuitProveedor)
         activate Ctrl
             Ctrl --> Ctrl : unProveedor
@@ -101,24 +101,24 @@ activate Ctrl
         Efectivo, TransferenciaBancaria o Cheque.
         MedioPago es abstracta, no se instancia.
     end note
-    loop [por cada medio de pago en mediosPago]
-        Ctrl -> MedioPago : procesarPago()
-        activate MedioPago
-            MedioPago --> Ctrl : true
-        deactivate MedioPago
-    end
     Ctrl -> OrdenPago : procesarPago(mediosPago)
     activate OrdenPago
+        loop [por cada MedioPago en mediosPago]
+            OrdenPago -> MedioPago : procesarPago()
+            activate MedioPago
+                MedioPago --> OrdenPago : true
+            deactivate MedioPago
+        end
         OrdenPago --> Ctrl : true
     deactivate OrdenPago
     Ctrl -> OrdenPago : cerrarOrden()
     activate OrdenPago
         OrdenPago --> Ctrl : EMITIDA
     deactivate OrdenPago
-    loop [por cada comprobante cancelado]
+    loop [por cada cancelacion en obtenerCancelaciones()]
         Ctrl -> Proveedor : registrarPago(importeCancelado)
         activate Proveedor
-            Proveedor --> Ctrl : saldoPendiente actualizado
+            Proveedor --> Ctrl : ok
         deactivate Proveedor
     end
     Ctrl --> Operador : Orden de Pago emitida exitosamente

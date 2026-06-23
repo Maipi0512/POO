@@ -91,6 +91,14 @@ package "m8_usuarios" #EEF {
     + esAdministrador() : boolean
     + validarCredenciales(usuario: String, clave: String) : boolean
     + getRol() : RolUsuario
+    + getIdUsuario() : int
+    + getNombre() : String
+    + getApellido() : String
+    + getUsername() : String
+    + isActivo() : boolean
+    + setActivo(activo: boolean) : void
+    + setRol(rol: RolUsuario) : void
+    + setPassword(password: String) : void
   }
 
   class Autorizacion {
@@ -104,6 +112,7 @@ package "m8_usuarios" #EEF {
     + getSupervisor() : Usuario
     + getFechaHora() : Date
     + getMotivo() : String
+    + getObservaciones() : String
     + setObservaciones(obs: String) : void
   }
 
@@ -148,6 +157,10 @@ package "m1_proveedores" #EFE {
     --
     + estaVigente(fecha: Date) : boolean
     + getTipoImpuesto() : TipoImpuesto
+    + getNumeroCertificado() : String
+    + getFechaEmision() : Date
+    + getFechaVigencia() : Date
+    + getBaseImponible() : double
   }
 
   class Proveedor {
@@ -175,6 +188,15 @@ package "m1_proveedores" #EFE {
     + agregarRubro(rubro: Rubro) : void
     + reemplazarRubros(nuevosRubros: List<Rubro>) : void
     + getComprobantes() : List<Comprobante>
+    + getCuit() : String
+    + getRazonSocial() : String
+    + getNombreFantasia() : String
+    + getCondicionIVA() : CondicionIVA
+    + getTopeMaximoDeuda() : double
+    + isActivo() : boolean
+    + getRubros() : List<Rubro>
+    + setTopeMaximoDeuda(v: double) : void
+    + setActivo(v: boolean) : void
   }
 
   Proveedor "1" -- "1" CondicionIVA
@@ -208,6 +230,7 @@ package "m2_productos" #FEF {
     + setFechaFinVigencia(fecha: Date) : void
     + getPrecioUnitario() : double
     + getFechaAcuerdo() : Date
+    + getFechaFinVigencia() : Date
     + getProveedor() : Proveedor
   }
 
@@ -224,6 +247,10 @@ package "m2_productos" #FEF {
     + obtenerPreciosHistoricos() : List<PrecioAcordado>
     + getTipoIVA() : TipoIVA
     + getRubro() : Rubro
+    + getCodigoInterno() : String
+    + getDescripcion() : String
+    + getUnidadMedida() : String
+    + isActivo() : boolean
     + setActivo(activo: boolean) : void
   }
 
@@ -255,6 +282,9 @@ package "m3_impuestos" #FEE {
     + EscalaRetencion(montoDesde, montoHasta, porcentaje)
     --
     + aplicaA(monto: double) : boolean
+    + getMontoDesde() : double
+    + getMontoHasta() : double
+    + getPorcentaje() : double
   }
 
   abstract class Impuesto {
@@ -269,6 +299,10 @@ package "m3_impuestos" #FEE {
     + determinarPorcentaje(base: double) : double
     + {abstract} calcularRetencion(base: double, prov: Proveedor) : double
     + getTipo() : TipoImpuesto
+    + getIdImpuesto() : int
+    + getNombre() : String
+    + getPorcentajeBase() : double
+    + getMinimoNoImponible() : double
   }
 
   class ImpuestoIVA {
@@ -320,13 +354,16 @@ package "m4_ordenes_compra" #EFF {
     - nroLinea : int
     - cantidad : double
     - precioUnitario : double
+    - subtotal : double
     --
     + DetalleOC(nroLinea, producto, cantidad, precioUnitario)
     --
     + calcularSubtotal() : double
     + getProducto() : Producto
+    + getNroLinea() : int
     + getCantidad() : double
     + getPrecioUnitario() : double
+    + getSubtotal() : double
   }
 
   class OrdenCompra {
@@ -346,6 +383,10 @@ package "m4_ordenes_compra" #EFF {
     + getDetalles() : List<DetalleOC>
     + getEstado() : EstadoOrdenCompra
     + getProveedor() : Proveedor
+    + getNumero() : String
+    + getFechaEmision() : Date
+    + getImporteTotal() : double
+    + getAutorizacion() : Autorizacion
   }
 
   DetalleOC "1..*" --> "1" Producto
@@ -366,14 +407,19 @@ package "m5_comprobantes" #FFE {
     - cantidad : double
     - precioUnitario : double
     - alicuotaIVA : double
+    - subtotal : double
+    - importeIVA : double
     --
     + DetalleComprobante(nroLinea, producto, cantidad, precioUnitario, alicuotaIVA)
     --
     + getTotalConIVA() : double
     + getProducto() : Producto
+    + getNroLinea() : int
     + getCantidad() : double
     + getPrecioUnitario() : double
     + getAlicuotaIVA() : double
+    + getSubtotal() : double
+    + getImporteIVA() : double
   }
 
   abstract class Comprobante {
@@ -397,6 +443,15 @@ package "m5_comprobantes" #FFE {
     + getEstado() : EstadoComprobante
     + getSaldoPendiente() : double
     + getImporteTotal() : double
+    + getImporteNeto() : double
+    + getImporteIVA() : double
+    + getNumero() : String
+    + getTipo() : TipoComprobante
+    + getFechaEmision() : Date
+    + getFechaRecepcion() : Date
+    + getProveedor() : Proveedor
+    + getAutorizacion() : Autorizacion
+    + setAutorizacion(a: Autorizacion) : void
   }
 
   class Factura {
@@ -465,7 +520,9 @@ package "m6_ordenes_pago" #FEF {
     --
     + {abstract} procesarPago() : boolean
     + {abstract} obtenerDescripcion() : String
+    + getIdMedioPago() : int
     + getImporte() : double
+    + getFecha() : Date
   }
 
   class Efectivo {
@@ -497,7 +554,10 @@ package "m6_ordenes_pago" #FEF {
     --
     + procesarPago() : boolean
     + getNumeroCheque() : String
+    + getFechaEmisionCheque() : Date
     + getFechaVencimiento() : Date
+    + getFirmante() : String
+    + getBanco() : String
   }
 
   class ChequePropio {
@@ -534,6 +594,13 @@ package "m6_ordenes_pago" #FEF {
     + obtenerCancelaciones() : List<CancelacionComprobante>
     + getEstado() : EstadoOrdenPago
     + getProveedor() : Proveedor
+    + getNumero() : String
+    + getFechaEmision() : Date
+    + getImporteBruto() : double
+    + getTotalRetenciones() : double
+    + getImporteNeto() : double
+    + getRetenciones() : List<Retencion>
+    + getMediosPago() : List<MedioPago>
   }
 
   Efectivo --|> MedioPago
