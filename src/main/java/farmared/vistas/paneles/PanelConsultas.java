@@ -47,7 +47,7 @@ public class PanelConsultas extends JPanel {
         JButton ordenesPago    = new JButton("Ordenes de pago");
 
         superior.add(new JLabel("Proveedor:")); superior.add(comboProveedores);
-        superior.add(codigoProducto);
+        superior.add(new JLabel("Cod. Producto:")); superior.add(codigoProducto);
         superior.add(cuentaCorriente); superior.add(impagos); superior.add(deuda);
         superior.add(retenciones); superior.add(libroIVA); superior.add(compulsa);
         superior.add(facturasDia); superior.add(pagos);

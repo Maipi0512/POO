@@ -4,7 +4,6 @@ import farmared.modelo.enums.EstadoOrdenCompra;
 import farmared.modelo.enums.TipoComprobante;
 import farmared.modelo.modulos.m4_ordenes_compra.DetalleOC;
 import farmared.modelo.modulos.m4_ordenes_compra.OrdenCompra;
-import farmared.dto.ProductoDTO;
 import farmared.dto.ProveedorDTO;
 import farmared.dto.ComprobanteDTO;
 import farmared.dto.UsuarioDTO;
@@ -28,10 +27,7 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
 
     private final JComboBox<String>        comboProveedores = new JComboBox<>();
     private final JComboBox<TipoComprobante> tipoComprobante = new JComboBox<>(TipoComprobante.values());
-    private final JComboBox<ProductoDTO>   comboProductos   = new JComboBox<>();
     private final JComboBox<OrdenCompra>   comboOC          = new JComboBox<>();
-    private final JTextField cantidad = new JTextField(6);
-    private final JTextField precioUnitario = new JTextField(8);
     private final JLabel lblCarrito = new JLabel("Carrito: 0 item(s) | Total: $0.00");
     private final JTable tablaDetalle = new JTable();
     private final JTable tablaComprobantes = new JTable();
@@ -70,27 +66,9 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         superior.add(new JLabel("OC:"), gbc(++col, 0));
         gbc.gridx = ++col; superior.add(comboOC, gbc);
 
-        col = 0;
-        gbc.gridy = 1;
-        superior.add(new JLabel("Producto:"), gbc(col, 1));
-        gbc.gridx = ++col; gbc.gridwidth = 2; superior.add(comboProductos, gbc);
-        gbc.gridwidth = 1;
-        superior.add(new JLabel("Cant:"), gbc(++col, 1));
-        gbc.gridx = ++col; superior.add(cantidad, gbc);
-        superior.add(new JLabel("Precio:"), gbc(++col, 1));
-        gbc.gridx = ++col; superior.add(precioUnitario, gbc);
-
         JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton agregar    = new JButton("Agregar al carrito");
-        JButton quitar     = new JButton("Quitar linea");
-        JButton verificar  = new JButton("Verificar vs OC");
         JButton registrar  = new JButton("Registrar comprobante");
-        JButton limpiar    = new JButton("Vaciar carrito");
-        acciones.add(agregar);
-        acciones.add(quitar);
-        acciones.add(verificar);
         acciones.add(registrar);
-        acciones.add(limpiar);
         acciones.add(lblCarrito);
 
         comboOC.setRenderer(new DefaultListCellRenderer() {
@@ -108,14 +86,9 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
             }
         });
 
-        verificar.addActionListener(e -> verificarVsOC());
         comboOC.addActionListener(e -> cargarDesdeOC());
         comboProveedores.addActionListener(e -> cargarProductosProveedor());
-        comboProductos.addActionListener(e -> autocompletarPrecio());
-        agregar.addActionListener(e -> agregarAlCarrito());
-        quitar.addActionListener(e -> quitarLinea());
         registrar.addActionListener(e -> registrarComprobante());
-        limpiar.addActionListener(e -> limpiarCarrito());
 
         JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(tablaDetalle),
@@ -162,89 +135,11 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         }
     }
 
-    private void verificarVsOC() {
-        OrdenCompra oc = (OrdenCompra) comboOC.getSelectedItem();
-        if (oc == null) { UiUtil.mostrarError(this, "Seleccione una OC para comparar."); return; }
-        if (detallesPendientes.isEmpty()) { UiUtil.mostrarError(this, "El carrito esta vacio."); return; }
-
-        String[] cols = {"Codigo", "Descripcion", "Cant. OC", "Cant. Comp.", "Precio OC", "Precio Comp.", "Dif. Precio", "OK"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-
-        boolean todoOk = true;
-        for (ComprobanteDTO.DetalleComprobanteDTO dc : detallesPendientes) {
-            String codigo = dc.getCodigoProducto();
-            DetalleOC docOC = null;
-            for (DetalleOC d : oc.getDetalles()) {
-                if (d.getProducto().getCodigoInterno().equals(codigo)) { docOC = d; break; }
-            }
-            if (docOC == null) {
-                model.addRow(new Object[]{
-                        codigo, dc.getDescripcionProducto(),
-                        "-", dc.getCantidad(),
-                        "-", UiUtil.formatearMoneda(dc.getPrecioUnitario()),
-                        "N/A (no esta en OC)", "NO"
-                });
-                todoOk = false;
-            } else {
-                double difPct = Math.abs(dc.getPrecioUnitario() - docOC.getPrecioUnitario())
-                        / docOC.getPrecioUnitario() * 100;
-                boolean precioOk = difPct <= 0.01;
-                boolean cantOk   = Math.abs(dc.getCantidad() - docOC.getCantidad()) < 0.001;
-                boolean lineaOk  = precioOk && cantOk;
-                todoOk = todoOk && lineaOk;
-                model.addRow(new Object[]{
-                        codigo, dc.getDescripcionProducto(),
-                        docOC.getCantidad(), dc.getCantidad(),
-                        UiUtil.formatearMoneda(docOC.getPrecioUnitario()),
-                        UiUtil.formatearMoneda(dc.getPrecioUnitario()),
-                        precioOk ? "0%" : String.format("%.2f%%", difPct),
-                        lineaOk ? "Si" : "NO"
-                });
-            }
-        }
-
-        JTable tablaComp = new JTable(model) {
-            @Override
-            public Component prepareRenderer(javax.swing.table.TableCellRenderer r, int row, int col) {
-                Component c = super.prepareRenderer(r, row, col);
-                String ok = (String) getValueAt(row, 7);
-                c.setBackground("Si".equals(ok)
-                        ? new Color(198, 239, 206)
-                        : new Color(255, 199, 206));
-                c.setForeground(Color.BLACK);
-                return c;
-            }
-        };
-
-        JScrollPane scroll = new JScrollPane(tablaComp);
-        scroll.setPreferredSize(new Dimension(680, 200));
-        String titulo = todoOk ? "Todo coincide con la OC" : "HAY DIFERENCIAS con la OC";
-        JOptionPane.showMessageDialog(this, scroll, titulo,
-                todoOk ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
-    }
-
     private void cargarDesdeOC() {
         if (actualizandoCombos) return;
         OrdenCompra oc = (OrdenCompra) comboOC.getSelectedItem();
-
-        actualizandoCombos = true;
-        comboProductos.removeAllItems();
-        if (oc == null) {
-            try {
-                for (ProductoDTO p : AppContext.getInstancia().getOrdenCompraCtrl()
-                        .listarProductosPorProveedorDTO(obtenerCuitSeleccionado())) {
-                    comboProductos.addItem(p);
-                }
-            } catch (Exception ignored) {}
-        } else {
-            for (DetalleOC d : oc.getDetalles()) {
-                ProductoDTO dto = AppContext.getInstancia().getProductoCtrl()
-                        .buscarProductoDTO(d.getProducto().getCodigoInterno());
-                if (dto != null) comboProductos.addItem(dto);
-            }
-            detallesPendientes.clear();
+        detallesPendientes.clear();
+        if (oc != null) {
             int linea = 1;
             for (DetalleOC d : oc.getDetalles()) {
                 double alicuota = d.getProducto().getTipoIVA().getPorcentaje();
@@ -255,104 +150,31 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
                         d.getCantidad(), d.getPrecioUnitario(), alicuota, subtotal, iva
                 ));
             }
-            refrescarCarrito();
         }
-        actualizandoCombos = false;
-        autocompletarPrecio();
+        refrescarCarrito();
     }
 
     private void cargarProductosProveedor() {
         actualizandoCombos = true;
-        comboProductos.removeAllItems();
         comboOC.removeAllItems();
         comboOC.addItem(null);
         try {
             String cuit = obtenerCuitSeleccionado();
-            for (ProductoDTO p : AppContext.getInstancia().getOrdenCompraCtrl().listarProductosPorProveedorDTO(cuit)) {
-                comboProductos.addItem(p);
-            }
             for (OrdenCompra oc : controlador.listarOCsPorProveedor(cuit)) {
                 if (oc.getEstado() != EstadoOrdenCompra.ANULADA
                         && oc.getEstado() != EstadoOrdenCompra.FACTURADA) {
                     comboOC.addItem(oc);
                 }
             }
-            autocompletarPrecio();
         } catch (Exception ignored) {
         }
         actualizandoCombos = false;
-    }
-
-    private void autocompletarPrecio() {
-        ProductoDTO prod = (ProductoDTO) comboProductos.getSelectedItem();
-        if (prod == null) return;
-        try {
-            double precio = AppContext.getInstancia().getOrdenCompraCtrl().obtenerPrecioVigente(prod.getCodigoInterno(), obtenerCuitSeleccionado());
-            if (precio > 0) precioUnitario.setText(String.valueOf(precio));
-        } catch (Exception ignored) {
-        }
     }
 
     private String obtenerCuitSeleccionado() {
         String item = (String) comboProveedores.getSelectedItem();
         if (item == null) throw new IllegalArgumentException("Seleccione un proveedor.");
         return item.split(" - ")[0];
-    }
-
-    private void agregarAlCarrito() {
-        try {
-            ProductoDTO producto = (ProductoDTO) comboProductos.getSelectedItem();
-            if (producto == null) throw new IllegalArgumentException("Seleccione un producto del proveedor.");
-
-            double cant = UiUtil.parsearDouble(cantidad.getText(), "Cantidad");
-            if (cant <= 0) throw new IllegalArgumentException("La cantidad debe ser mayor a cero.");
-
-            double precio;
-            if (precioUnitario.getText().trim().isEmpty()) {
-                precio = AppContext.getInstancia().getOrdenCompraCtrl().obtenerPrecioVigente(producto.getCodigoInterno(), obtenerCuitSeleccionado());
-                if (precio <= 0) throw new IllegalArgumentException("Sin precio vigente para este proveedor.");
-            } else {
-                precio = UiUtil.parsearDouble(precioUnitario.getText(), "Precio");
-            }
-
-            int linea = detallesPendientes.size() + 1;
-            double alicuota = farmared.modelo.enums.TipoIVA.valueOf(producto.getTipoIVA()).getPorcentaje();
-            double subtotal = Math.round(cant * precio * 100.0) / 100.0;
-            double iva = Math.round(subtotal * (alicuota / 100.0) * 100.0) / 100.0;
-
-            ComprobanteDTO.DetalleComprobanteDTO det = new ComprobanteDTO.DetalleComprobanteDTO(
-                    linea, producto.getCodigoInterno(), producto.getDescripcion(), cant, precio, alicuota, subtotal, iva
-            );
-            detallesPendientes.add(det);
-            cantidad.setText("");
-            refrescarCarrito();
-        } catch (Exception ex) {
-            UiUtil.mostrarError(this, ex.getMessage());
-        }
-    }
-
-    private void quitarLinea() {
-        int fila = tablaDetalle.getSelectedRow();
-        if (fila < 0) {
-            UiUtil.mostrarError(this, "Seleccione una linea del carrito.");
-            return;
-        }
-        detallesPendientes.remove(fila);
-        renumerarLineas();
-        refrescarCarrito();
-    }
-
-    private void renumerarLineas() {
-        List<ComprobanteDTO.DetalleComprobanteDTO> nuevos = new ArrayList<>();
-        int n = 1;
-        for (ComprobanteDTO.DetalleComprobanteDTO d : detallesPendientes) {
-            nuevos.add(new ComprobanteDTO.DetalleComprobanteDTO(
-                    n++, d.getCodigoProducto(), d.getDescripcionProducto(), d.getCantidad(),
-                    d.getPrecioUnitario(), d.getAlicuotaIVA(), d.getSubtotal(), d.getImporteIVA()
-            ));
-        }
-        detallesPendientes.clear();
-        detallesPendientes.addAll(nuevos);
     }
 
     private void registrarComprobante() {
@@ -448,7 +270,6 @@ public class PanelComprobantes extends JPanel implements ObservadorSistema {
         if ("COMPROBANTE_REGISTRADO".equals(evento) || "OC_EMITIDA".equals(evento)
                 || "PROVEEDOR_REGISTRADO".equals(evento)) {
             cargarDatos();
-            cargarProductosProveedor();
         }
     }
 }
