@@ -10,28 +10,28 @@ participant "Factura" as Factura
 participant "DetalleComprobante" as DetalleComp
 participant "OrdenCompra" as OrdenCompra
 
-Operador -> Ctrl : registrarFactura(datos, idProveedor, nrosOC[])
+Operador -> Ctrl : registrarFactura(numero, tipo, fechaEmision, fechaRecepcion,\ndatos: List<DetalleComprobante>, cuitProveedor, nrosOC: List<String>,\nsupervisor, motivo)
 activate Ctrl
     note right of Ctrl
         Ctrl = FacturaController.getInstance()
     end note
 
     loop [buscar en colección de proveedores]
-        Ctrl -> Ctrl : buscarProveedorPorId(idProveedor)
+        Ctrl -> Ctrl : buscarProveedorPorId(cuitProveedor)
         activate Ctrl
             Ctrl --> Ctrl : unProveedor
         deactivate Ctrl
     end
 
     create Factura
-    Ctrl -> Factura : new Factura(numero, tipo, fechaEmision, fechaRecepcion)
+    Ctrl -> Factura : new Factura(numero, tipo, fechaEmision, fechaRecepcion, unProveedor)
     activate Factura
         Factura --> Ctrl : unaFactura
     deactivate Factura
 
     loop [por cada item en datos]
         create DetalleComp
-        Ctrl -> DetalleComp : new DetalleComprobante(producto, cantidad, precioUnitario, alicuotaIVA)
+        Ctrl -> DetalleComp : new DetalleComprobante(nroLinea, producto, cantidad, precioUnitario, alicuotaIVA)
         activate DetalleComp
             DetalleComp --> Ctrl : unDetalleComp
         deactivate DetalleComp
@@ -46,7 +46,7 @@ activate Ctrl
         Factura --> Ctrl : detallesFactura
     deactivate Factura
 
-    loop [por cada nroOC en nrosOC[]]
+    loop [por cada nroOC en nrosOC]
         loop [buscar en colección de órdenes de compra]
             Ctrl -> Ctrl : buscarOrdenCompraPorNumero(nroOC)
             activate Ctrl
@@ -76,12 +76,16 @@ activate Ctrl
 
     Ctrl -> Factura : calcularImpuestos()
     activate Factura
-        Factura --> Ctrl : importeIVA, importeTotal
+        note right of Factura
+            Calcula y actualiza importeIVA
+            e importeTotal internamente (void)
+        end note
+        Factura --> Ctrl : ok
     deactivate Factura
 
     Ctrl -> Factura : afectarCuentaCorriente()
     activate Factura
-        Factura --> Ctrl : deltaDeuda
+        Factura --> Ctrl : deltaDeuda : double
     deactivate Factura
 
     Ctrl -> Proveedor : actualizarDeuda(deltaDeuda)
@@ -95,7 +99,7 @@ activate Ctrl
     deactivate Proveedor
 
     loop [por cada OC afectada]
-        Ctrl -> OrdenCompra : actualizarEstado()
+        Ctrl -> OrdenCompra : actualizarEstado(nuevoEstado: EstadoOrdenCompra)
         activate OrdenCompra
             note right of OrdenCompra
                 Estado pasa a PARCIALMENTE_FACTURADA

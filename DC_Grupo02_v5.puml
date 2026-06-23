@@ -1,0 +1,553 @@
+@startuml DC_SistemaGestionComprasFarmared
+title Diagrama de Clases - Sistema de Gestion de Compras FarmaRed
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+' ===========================================================================
+' ENUMS
+' ===========================================================================
+
+package "enums" #FAFAFA {
+
+  enum CondicionIVA {
+    RESPONSABLE_INSCRIPTO
+    MONOTRIBUTISTA
+    EXENTO
+    CONSUMIDOR_FINAL
+  }
+
+  enum TipoImpuesto {
+    IVA
+    INGRESOS_BRUTOS
+    GANANCIAS
+  }
+
+  enum TipoIVA {
+    IVA_21
+    IVA_10_5
+    IVA_27
+    EXENTO
+    --
+    - porcentaje : double
+    --
+    + getPorcentaje() : double
+  }
+
+  enum TipoComprobante {
+    FACTURA_A
+    FACTURA_B
+    FACTURA_C
+    NOTA_CREDITO
+    NOTA_DEBITO
+  }
+
+  enum EstadoOrdenCompra {
+    EMITIDA
+    AUTORIZADA
+    PARCIALMENTE_FACTURADA
+    FACTURADA
+    ANULADA
+  }
+
+  enum EstadoOrdenPago {
+    GENERADA
+    EMITIDA
+    ANULADA
+  }
+
+  enum EstadoComprobante {
+    PENDIENTE
+    PAGADO_PARCIAL
+    PAGADO_TOTAL
+    ANULADO
+  }
+
+  enum RolUsuario {
+    ADMINISTRADOR
+    OPERADOR
+    SUPERVISOR
+  }
+}
+
+' ===========================================================================
+' M8: USUARIOS
+' ===========================================================================
+
+package "m8_usuarios" #EEF {
+
+  class Usuario {
+    - idUsuario : int
+    - nombre : String
+    - apellido : String
+    - username : String
+    - password : String
+    - activo : boolean
+    --
+    + Usuario(idUsuario, nombre, apellido, username, password, rol)
+    --
+    + esAutorizador() : boolean
+    + esAdministrador() : boolean
+    + validarCredenciales(usuario: String, clave: String) : boolean
+    + getRol() : RolUsuario
+  }
+
+  class Autorizacion {
+    - idAutorizacion : int
+    - fechaHora : Date
+    - motivo : String
+    - observaciones : String
+    --
+    + Autorizacion(idAutorizacion, supervisor, motivo)
+    --
+    + getSupervisor() : Usuario
+    + getFechaHora() : Date
+    + getMotivo() : String
+    + setObservaciones(obs: String) : void
+  }
+
+  Usuario "1" -- "1" RolUsuario
+  Autorizacion "0..*" --> "1" Usuario : supervisor
+}
+
+' ===========================================================================
+' M1: PROVEEDORES
+' ===========================================================================
+
+package "m1_proveedores" #EFE {
+
+  class CUIT <<Value Object>> {
+    - valor : String
+    --
+    + CUIT(valor: String)
+    --
+    + getValor() : String
+  }
+
+  class Rubro {
+    - idRubro : int
+    - nombre : String
+    - descripcion : String
+    --
+    + Rubro(idRubro, nombre, descripcion)
+    --
+    + getIdRubro() : int
+    + getNombre() : String
+    + setNombre(nombre: String) : void
+    + setDescripcion(descripcion: String) : void
+  }
+
+  class CertificadoNoRetencion {
+    - numeroCertificado : String
+    - fechaEmision : Date
+    - fechaVigencia : Date
+    - baseImponible : double
+    --
+    + CertificadoNoRetencion(numeroCertificado, tipoImpuesto, fechaEmision, fechaVigencia, baseImponible)
+    --
+    + estaVigente(fecha: Date) : boolean
+    + getTipoImpuesto() : TipoImpuesto
+  }
+
+  class Proveedor {
+    - cuit : String
+    - razonSocial : String
+    - nombreFantasia : String
+    - domicilioComercial : String
+    - telefono : String
+    - email : String
+    - numeroIngresosBrutos : String
+    - fechaInicioActividades : Date
+    - topeMaximoDeuda : double
+    - activo : boolean
+    --
+    + Proveedor(cuit, razonSocial, nombreFantasia, domicilioComercial, telefono, email, condicionIVA, numeroIngresosBrutos, fechaInicioActividades)
+    --
+    + obtenerCuentaCorriente() : double
+    + calcularDeudaVigente() : double
+    + actualizarDeuda(delta: double) : void
+    + registrarPago(importeCancelado: double) : void
+    + agregarComprobante(comprobante: Comprobante) : void
+    + validarNuevaOC(importeTotalOC: double) : boolean
+    + agregarCertificado(cert: CertificadoNoRetencion) : void
+    + tieneCertificadoVigente(tipo: TipoImpuesto) : boolean
+    + agregarRubro(rubro: Rubro) : void
+    + reemplazarRubros(nuevosRubros: List<Rubro>) : void
+    + getComprobantes() : List<Comprobante>
+  }
+
+  Proveedor "1" -- "1" CondicionIVA
+  Proveedor "1" *-- "0..*" Rubro : rubros
+  Proveedor "1" *-- "0..*" CertificadoNoRetencion : certificados
+  CertificadoNoRetencion "1" -- "1" TipoImpuesto
+}
+
+' ===========================================================================
+' M2: PRODUCTOS
+' ===========================================================================
+
+package "m2_productos" #FEF {
+
+  class Precio <<Value Object>> {
+    - monto : double
+    --
+    + Precio(monto: double)
+    --
+    + getMonto() : double
+  }
+
+  class PrecioAcordado {
+    - precioUnitario : double
+    - fechaAcuerdo : Date
+    - fechaFinVigencia : Date
+    --
+    + PrecioAcordado(precioUnitario, fechaAcuerdo, fechaFinVigencia, proveedor)
+    --
+    + estaVigente() : boolean
+    + setFechaFinVigencia(fecha: Date) : void
+    + getPrecioUnitario() : double
+    + getFechaAcuerdo() : Date
+    + getProveedor() : Proveedor
+  }
+
+  class Producto {
+    - codigoInterno : String
+    - descripcion : String
+    - unidadMedida : String
+    - activo : boolean
+    --
+    + Producto(codigoInterno, descripcion, unidadMedida, tipoIVA, rubro)
+    --
+    + agregarPrecioAcordado(precio: PrecioAcordado) : void
+    + obtenerUltimoPrecio(proveedor: Proveedor) : PrecioAcordado
+    + obtenerPreciosHistoricos() : List<PrecioAcordado>
+    + getTipoIVA() : TipoIVA
+    + getRubro() : Rubro
+    + setActivo(activo: boolean) : void
+  }
+
+  Producto "1" -- "1" TipoIVA
+  Producto "1" --> "1" Rubro
+  Producto "1" *-- "0..*" PrecioAcordado : preciosAcordados
+  PrecioAcordado "0..*" --> "1" Proveedor
+}
+
+' ===========================================================================
+' M3: IMPUESTOS
+' ===========================================================================
+
+package "m3_impuestos" #FEE {
+
+  class Porcentaje <<Value Object>> {
+    - valor : double
+    --
+    + Porcentaje(valor: double)
+    --
+    + getValor() : double
+  }
+
+  class EscalaRetencion {
+    - montoDesde : double
+    - montoHasta : double
+    - porcentaje : double
+    --
+    + EscalaRetencion(montoDesde, montoHasta, porcentaje)
+    --
+    + aplicaA(monto: double) : boolean
+  }
+
+  abstract class Impuesto {
+    - idImpuesto : int
+    - nombre : String
+    - porcentajeBase : double
+    - minimoNoImponible : double
+    --
+    + Impuesto(idImpuesto, nombre, tipo, porcentajeBase, minimoNoImponible)
+    --
+    + agregarEscala(escala: EscalaRetencion) : void
+    + determinarPorcentaje(base: double) : double
+    + {abstract} calcularRetencion(base: double, prov: Proveedor) : double
+    + getTipo() : TipoImpuesto
+  }
+
+  class ImpuestoIVA {
+    + ImpuestoIVA(idImpuesto, porcentajeBase, minimoNoImponible)
+    --
+    + calcularRetencion(base: double, prov: Proveedor) : double
+  }
+
+  class ImpuestoIngresosBrutos {
+    + ImpuestoIngresosBrutos(idImpuesto, porcentajeBase, minimoNoImponible)
+    --
+    + calcularRetencion(base: double, prov: Proveedor) : double
+  }
+
+  class ImpuestoGanancias {
+    + ImpuestoGanancias(idImpuesto, porcentajeBase, minimoNoImponible)
+    --
+    + calcularRetencion(base: double, prov: Proveedor) : double
+  }
+
+  class Retencion {
+    - base : double
+    - porcentajeAplicado : double
+    - importe : double
+    --
+    + Retencion(impuesto, base, porcentajeAplicado, importe)
+    --
+    + getImpuesto() : Impuesto
+    + getBase() : double
+    + getPorcentajeAplicado() : double
+    + getImporte() : double
+  }
+
+  Impuesto "1" -- "1" TipoImpuesto
+  Impuesto "1" *-- "0..*" EscalaRetencion : escalas
+  ImpuestoIVA --|> Impuesto
+  ImpuestoIngresosBrutos --|> Impuesto
+  ImpuestoGanancias --|> Impuesto
+  Retencion "0..*" --> "1" Impuesto
+}
+
+' ===========================================================================
+' M4: ORDENES DE COMPRA
+' ===========================================================================
+
+package "m4_ordenes_compra" #EFF {
+
+  class DetalleOC {
+    - nroLinea : int
+    - cantidad : double
+    - precioUnitario : double
+    --
+    + DetalleOC(nroLinea, producto, cantidad, precioUnitario)
+    --
+    + calcularSubtotal() : double
+    + getProducto() : Producto
+    + getCantidad() : double
+    + getPrecioUnitario() : double
+  }
+
+  class OrdenCompra {
+    - numero : String
+    - fechaEmision : Date
+    - importeTotal : double
+    --
+    + OrdenCompra(numero, proveedor)
+    --
+    + agregarDetalle(detalle: DetalleOC) : void
+    + calcularTotal() : double
+    + validarTopeDeuda() : boolean
+    + actualizarEstado(nuevoEstado: EstadoOrdenCompra) : void
+    + emitir() : void
+    + emitirConAutorizacion(auth: Autorizacion) : void
+    + anular() : void
+    + getDetalles() : List<DetalleOC>
+    + getEstado() : EstadoOrdenCompra
+    + getProveedor() : Proveedor
+  }
+
+  DetalleOC "1..*" --> "1" Producto
+  OrdenCompra "1" *-- "1..*" DetalleOC : detalles
+  OrdenCompra "1" --> "1" Proveedor
+  OrdenCompra "1" -- "1" EstadoOrdenCompra
+  OrdenCompra "0..1" --> "0..1" Autorizacion
+}
+
+' ===========================================================================
+' M5: COMPROBANTES
+' ===========================================================================
+
+package "m5_comprobantes" #FFE {
+
+  class DetalleComprobante {
+    - nroLinea : int
+    - cantidad : double
+    - precioUnitario : double
+    - alicuotaIVA : double
+    --
+    + DetalleComprobante(nroLinea, producto, cantidad, precioUnitario, alicuotaIVA)
+    --
+    + getTotalConIVA() : double
+    + getProducto() : Producto
+    + getCantidad() : double
+    + getPrecioUnitario() : double
+    + getAlicuotaIVA() : double
+  }
+
+  abstract class Comprobante {
+    # numero : String
+    # fechaEmision : Date
+    # fechaRecepcion : Date
+    # importeNeto : double
+    # importeIVA : double
+    # importeTotal : double
+    # saldoPendiente : double
+    --
+    # Comprobante(numero, tipo, fechaEmision, fechaRecepcion, proveedor)
+    --
+    + {abstract} afectarCuentaCorriente() : double
+    + {abstract} esSumaDeuda() : boolean
+    + agregarDetalle(detalle: DetalleComprobante) : void
+    + calcularImpuestos() : void
+    + registrarPago(montoCancelado: double) : void
+    + anular() : void
+    + getDetalles() : List<DetalleComprobante>
+    + getEstado() : EstadoComprobante
+    + getSaldoPendiente() : double
+    + getImporteTotal() : double
+  }
+
+  class Factura {
+    - tieneDesvio : boolean
+    --
+    + Factura(numero, tipo, fechaEmision, fechaRecepcion, proveedor)
+    --
+    + afectarCuentaCorriente() : double
+    + esSumaDeuda() : boolean
+    + asociarOrdenCompra(oc: OrdenCompra) : void
+    + getOrdenesCompraAsociadas() : List<OrdenCompra>
+    + isTieneDesvio() : boolean
+    + setTieneDesvio(desvio: boolean) : void
+  }
+
+  class NotaCredito {
+    + NotaCredito(numero, fechaEmision, fechaRecepcion, proveedor)
+    --
+    + afectarCuentaCorriente() : double
+    + esSumaDeuda() : boolean
+  }
+
+  class NotaDebito {
+    + NotaDebito(numero, fechaEmision, fechaRecepcion, proveedor)
+    --
+    + afectarCuentaCorriente() : double
+    + esSumaDeuda() : boolean
+  }
+
+  Factura --|> Comprobante
+  NotaCredito --|> Comprobante
+  NotaDebito --|> Comprobante
+
+  Comprobante "1" -- "1" TipoComprobante
+  Comprobante "1" -- "1" EstadoComprobante
+  Comprobante "1" --> "1" Proveedor
+  Comprobante "1" *-- "0..*" DetalleComprobante : detalles
+  Comprobante "0..1" --> "0..1" Autorizacion
+  DetalleComprobante "1" --> "1" Producto
+  Factura "0..*" --> "0..*" OrdenCompra : ordenesAsociadas
+}
+
+' ===========================================================================
+' M6: ORDENES DE PAGO
+' ===========================================================================
+
+package "m6_ordenes_pago" #FEF {
+
+  class CancelacionComprobante {
+    - importeCancelado : double
+    - esCancelacionTotal : boolean
+    --
+    + CancelacionComprobante(comprobante, importeCancelado, esCancelacionTotal)
+    --
+    + getComprobante() : Comprobante
+    + getImporteCancelado() : double
+    + isEsCancelacionTotal() : boolean
+  }
+
+  abstract class MedioPago {
+    # idMedioPago : int
+    # importe : double
+    # fecha : Date
+    --
+    # MedioPago(idMedioPago, importe, fecha)
+    --
+    + {abstract} procesarPago() : boolean
+    + {abstract} obtenerDescripcion() : String
+    + getImporte() : double
+  }
+
+  class Efectivo {
+    + Efectivo(idMedioPago, importe, fecha)
+    --
+    + procesarPago() : boolean
+    + obtenerDescripcion() : String
+  }
+
+  class TransferenciaBancaria {
+    - cbuOrigen : String
+    - cbuDestino : String
+    - numeroOperacion : String
+    --
+    + TransferenciaBancaria(idMedioPago, importe, fecha, cbuOrigen, cbuDestino, numeroOperacion)
+    --
+    + procesarPago() : boolean
+    + obtenerDescripcion() : String
+  }
+
+  abstract class Cheque {
+    # numero : String
+    # fechaEmisionCheque : Date
+    # fechaVencimiento : Date
+    # firmante : String
+    # banco : String
+    --
+    # Cheque(idMedioPago, importe, fechaPago, numero, fechaEmisionCheque, fechaVencimiento, firmante, banco)
+    --
+    + procesarPago() : boolean
+    + getNumeroCheque() : String
+    + getFechaVencimiento() : Date
+  }
+
+  class ChequePropio {
+    - cuentaOrigen : String
+    --
+    + ChequePropio(idMedioPago, importe, fechaPago, numero, fechaEmisionCheque, fechaVencimiento, firmante, banco, cuentaOrigen)
+    --
+    + obtenerDescripcion() : String
+  }
+
+  class ChequeTerceros {
+    - endosante : String
+    --
+    + ChequeTerceros(idMedioPago, importe, fechaPago, numero, fechaEmisionCheque, fechaVencimiento, firmante, banco, endosante)
+    --
+    + obtenerDescripcion() : String
+  }
+
+  class OrdenPago {
+    - numero : String
+    - fechaEmision : Date
+    - importeBruto : double
+    - totalRetenciones : double
+    - importeNeto : double
+    --
+    + OrdenPago(numero, proveedor, fechaEmision)
+    --
+    + agregarCancelacion(c: CancelacionComprobante) : void
+    + agregarRetencion(r: Retencion) : void
+    + generar() : void
+    + procesarPago(lista: List<MedioPago>) : boolean
+    + cerrarOrden() : void
+    + anular() : void
+    + obtenerCancelaciones() : List<CancelacionComprobante>
+    + getEstado() : EstadoOrdenPago
+    + getProveedor() : Proveedor
+  }
+
+  Efectivo --|> MedioPago
+  TransferenciaBancaria --|> MedioPago
+  Cheque --|> MedioPago
+  ChequePropio --|> Cheque
+  ChequeTerceros --|> Cheque
+
+  OrdenPago "1" -- "1" EstadoOrdenPago
+  OrdenPago "1" --> "1" Proveedor
+  OrdenPago "1" *-- "1..*" CancelacionComprobante : cancelaciones
+  OrdenPago "1" *-- "0..*" Retencion : retenciones
+  OrdenPago "1" *-- "1..*" MedioPago : mediosPago
+  CancelacionComprobante "0..*" --> "1" Comprobante
+}
+
+@enduml

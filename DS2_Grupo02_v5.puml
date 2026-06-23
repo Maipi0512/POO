@@ -14,29 +14,33 @@ participant Retencion
 participant MedioPago
 
 ' ---- iniciarOrdenPago ----
-Operador -> Ctrl : iniciarOrdenPago(idProveedor)
+Operador -> Ctrl : iniciarOrdenPago(cuitProveedor)
 activate Ctrl
     note right of Ctrl
         Ctrl = OrdenPagoController.getInstance()
     end note
     loop [buscar en colección de proveedores]
-        Ctrl -> Ctrl : buscarProveedorPorId(idProveedor)
+        Ctrl -> Ctrl : buscarProveedorPorId(cuitProveedor)
         activate Ctrl
             Ctrl --> Ctrl : unProveedor
         deactivate Ctrl
     end
-    Ctrl -> Proveedor : obtenerCuentaCorriente()
+    Ctrl -> Proveedor : getComprobantes()
     activate Proveedor
-        Proveedor --> Ctrl : comprobantesImpagos
+        Proveedor --> Ctrl : comprobantes
     deactivate Proveedor
+    note right of Ctrl
+        Filtra: saldoPendiente > 0
+        y estado != ANULADO
+    end note
     Ctrl --> Operador : lista de comprobantes impagos
 deactivate Ctrl
 
 ' ---- seleccionarComprobantes ----
-Operador -> Ctrl : seleccionarComprobantes(comprobantes, montos)
+Operador -> Ctrl : seleccionarComprobantes(cuitProveedor, seleccion: Map<Comprobante,Double>, fechaEmision)
 activate Ctrl
     create OrdenPago
-    Ctrl -> OrdenPago : new OrdenPago(unProveedor, fechaEmision)
+    Ctrl -> OrdenPago : new OrdenPago(numero, unProveedor, fechaEmision)
     activate OrdenPago
         OrdenPago --> Ctrl : unaOrdenPago
     deactivate OrdenPago
@@ -90,7 +94,7 @@ activate Ctrl
 deactivate Ctrl
 
 ' ---- confirmarPago ----
-Operador -> Ctrl : confirmarPago(unaOrdenPago, mediosPago)
+Operador -> Ctrl : confirmarPago(unaOrdenPago, mediosPago: List<MedioPago>)
 activate Ctrl
     note right of Ctrl
         mediosPago contiene instancias concretas:

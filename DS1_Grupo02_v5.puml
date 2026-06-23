@@ -10,13 +10,13 @@ participant OrdenCompra
 participant DetalleOC
 
 ' ---- crearOrdenCompra ----
-Operador -> Ctrl : crearOrdenCompra(idProveedor)
+Operador -> Ctrl : crearOrdenCompra(cuitProveedor)
 activate Ctrl
     note right of Ctrl
         Ctrl = OrdenCompraController.getInstance()
     end note
     loop [buscar en colección de proveedores]
-        Ctrl -> Ctrl : buscarProveedorPorId(idProveedor)
+        Ctrl -> Ctrl : buscarProveedorPorId(cuitProveedor)
         activate Ctrl
             Ctrl --> Ctrl : unProveedor
         deactivate Ctrl
@@ -26,7 +26,7 @@ activate Ctrl
         en la instancia del controller
     end note
     create OrdenCompra
-    Ctrl -> OrdenCompra : new OrdenCompra(unProveedor)
+    Ctrl -> OrdenCompra : new OrdenCompra(numero, unProveedor)
     activate OrdenCompra
         OrdenCompra --> Ctrl : unaOrdenCompra
     deactivate OrdenCompra
@@ -35,7 +35,7 @@ deactivate Ctrl
 
 ' ---- agregarItem (loop) ----
 loop LoopAgregarItems
-    Operador -> Ctrl : agregarItem(unaOrdenCompra, codigoProducto, cantidad)
+    Operador -> Ctrl : agregarItem(unaOrdenCompra, codigoProducto, cantidad, nroLinea)
     activate Ctrl
         loop [buscar en colección de productos]
             Ctrl -> Ctrl : buscarProductoPorCodigo(codigoProducto)
@@ -49,10 +49,10 @@ loop LoopAgregarItems
             activate PrecioAcordado
                 PrecioAcordado --> Producto : true
             deactivate PrecioAcordado
-            Producto --> Ctrl : unPrecio : double
+            Producto --> Ctrl : unPrecioAcordado : PrecioAcordado
         deactivate Producto
         create DetalleOC
-        Ctrl -> DetalleOC : new DetalleOC(unProducto, cantidad, unPrecio)
+        Ctrl -> DetalleOC : new DetalleOC(nroLinea, unProducto, cantidad, unPrecioAcordado.getPrecioUnitario())
         activate DetalleOC
             DetalleOC -> DetalleOC : calcularSubtotal()
             DetalleOC --> Ctrl : unDetalleOC
@@ -66,7 +66,7 @@ loop LoopAgregarItems
 end
 
 ' ---- emitirOrdenCompra ----
-Operador -> Ctrl : emitirOrdenCompra(unaOrdenCompra)
+Operador -> Ctrl : emitirOrdenCompra(unaOrdenCompra, supervisor, motivo)
 activate Ctrl
     Ctrl -> OrdenCompra : calcularTotal()
     activate OrdenCompra

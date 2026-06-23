@@ -10,14 +10,14 @@ participant "Comprobante" as Comprobante
 participant "OrdenPago" as OrdenPago
 participant "CancelacionComprobante" as Cancelacion
 
-Operador -> Ctrl : consultarCuentaCorriente(idProveedor)
+Operador -> Ctrl : consultarCuentaCorriente(cuitProveedor)
 activate Ctrl
     note right of Ctrl
         Ctrl = ReportesController.getInstance()
     end note
 
     loop [buscar en colección de proveedores]
-        Ctrl -> Ctrl : buscarProveedorPorId(idProveedor)
+        Ctrl -> Ctrl : buscarProveedorPorId(cuitProveedor)
         activate Ctrl
             Ctrl --> Ctrl : unProveedor
         deactivate Ctrl
@@ -25,7 +25,17 @@ activate Ctrl
 
     Ctrl -> Proveedor : obtenerCuentaCorriente()
     activate Proveedor
-        Proveedor --> Ctrl : comprobantes
+        note right of Proveedor
+            Delega a calcularDeudaVigente():
+            suma afectarCuentaCorriente()
+            de cada comprobante
+        end note
+        Proveedor --> Ctrl : deudaVigente : double
+    deactivate Proveedor
+
+    Ctrl -> Proveedor : getComprobantes()
+    activate Proveedor
+        Proveedor --> Ctrl : comprobantes : List<Comprobante>
     deactivate Proveedor
 
     loop [por cada Comprobante en comprobantes]
@@ -39,13 +49,8 @@ activate Ctrl
         deactivate Comprobante
     end
 
-    Ctrl -> Proveedor : calcularDeudaVigente()
-    activate Proveedor
-        Proveedor --> Ctrl : totalDeudaVigente
-    deactivate Proveedor
-
     loop [buscar en colección de órdenes de pago]
-        Ctrl -> Ctrl : buscarPagosPorProveedor(unProveedor)
+        Ctrl -> Ctrl : buscarPagosPorProveedor(cuitProveedor: String)
         activate Ctrl
             Ctrl --> Ctrl : historialPagos
         deactivate Ctrl
